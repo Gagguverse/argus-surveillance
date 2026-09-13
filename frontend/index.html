@@ -899,7 +899,7 @@
   const HUMAN_CLASSES = new Set(["person"]);
   const ANIMAL_CLASSES = new Set(["dog","cat","bird","horse","cow","elephant","bear","zebra","giraffe","sheep"]);
   const VEHICLE_CLASSES = new Set(["car","truck","bus","motorcycle","bicycle","airplane","boat","train"]);
-  const WS_URL = `ws://${location.host}/ws/live`;
+  const WS_URL = `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/ws/live`;
   const CAPTURE_INTERVAL_MS = 600;
   const CAPTURE_WIDTH = 480;
   const ACTIVITY_MAX_POINTS = 40;
