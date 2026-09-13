@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARGUS — AI Surveillance Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #06090D;
+    --panel: #0B0F16;
+    --panel-alt: #101622;
+    --border: #1A2433;
+    --border-bright: #26364D;
+    --text: #E4ECF5;
+    --text-dim: #7C8E9E;
+    --text-dimmer: #455466;
+    --accent: #00F0B5;
+    --accent-dim: #0B4035;
+    --accent-glow: rgba(0, 240, 181, 0.15);
+    --alert: #FF3D3D;
+    --alert-dim: #451212;
+    --alert-glow: rgba(255, 61, 61, 0.2);
+    --warn: #FFB300;
+    --warn-dim: #4D3700;
+    --info: #00B4D8;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html,body{ height:100%; overflow:hidden; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .app{ display:flex; flex-direction:column; height:100vh; }
+
+  /* ---------- COMMAND CENTER HEADER ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    flex-shrink:0;
+    z-index: 10;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand .logo-badge{
+    width: 30px; height: 30px; border: 1.5px solid var(--accent);
+    border-radius: 4px; display:flex; align-items:center; justify-content:center;
+    background: rgba(0, 240, 181, 0.08); box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .brand .logo-badge svg{ width: 18px; height: 18px; fill: var(--accent); }
+  .brand .title-wrap{ display:flex; flex-direction:column; }
+  .brand .mark{
+    font-family: var(--mono); font-size: 17px; font-weight: 700;
+    letter-spacing: 3px; color: var(--text); line-height: 1;
+  }
+  .brand .mark span{ color: var(--accent); }
+  .brand .subtitle{
+    font-family: var(--mono); font-size: 9px; color: var(--text-dim); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-top: 3px;
+  }
+
+  .system-indicators{ display:flex; align-items:center; gap:8px; }
+  .ind-pill{
+    display:flex; align-items:center; gap:6px;
+    font-family: var(--mono); font-size:10px; letter-spacing: 0.8px;
+    padding: 4px 10px; border:1px solid var(--border); border-radius:4px;
+    color: var(--text-dim); background: var(--panel-alt);
+    transition: all .2s ease;
+  }
+  .ind-pill .dot{
+    width:6px; height:6px; border-radius:50%; background: var(--text-dimmer);
+  }
+  .ind-pill.on{ color: var(--accent); border-color: var(--accent-dim); background: rgba(0, 240, 181, 0.04); }
+  .ind-pill.on .dot{ background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1.6s infinite; }
+  .ind-pill.alert-mode{ color: var(--alert); border-color: var(--alert-dim); background: rgba(255, 61, 61, 0.08); }
+  .ind-pill.alert-mode .dot{ background: var(--alert); box-shadow: 0 0 6px var(--alert); animation: pulse 0.8s infinite; }
+
+  .topbar-right{ display:flex; align-items:center; gap:12px; }
+  .clock{
+    font-family: var(--mono); font-size:12px; color: var(--text);
+    background: var(--panel-alt); padding: 5px 10px; border-radius: 4px;
+    border: 1px solid var(--border); letter-spacing: 1px;
+  }
+
+  .btn-export{
+    font-family: var(--sans); font-size:11px; font-weight:600;
+    padding: 6px 14px; border-radius:4px; border:1px solid var(--border-bright);
+    background: var(--panel-alt); color: var(--text); cursor:pointer;
+    display:flex; align-items:center; gap:6px; transition: all .2s ease;
+  }
+  .btn-export:hover{
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(0,240,181,0.08); box-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+
+  /* ---------- WORKSPACE ---------- */
+  .workspace{ flex:1; display:flex; min-height:0; }
+  .viewport{ flex:1; display:flex; flex-direction:column; padding: 14px 16px; min-width:0; }
+  
+  .viewport-header{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+  }
+  .mode-tabs{ display:flex; gap:4px; background: var(--panel); padding: 3px; border-radius: 5px; border: 1px solid var(--border); }
+  .mode-tab{
+    font-family: var(--mono); font-size:10px; letter-spacing:1px;
+    background: transparent; color: var(--text-dim);
+    border: none; padding:6px 14px; cursor:pointer; border-radius: 3px;
+    transition: all .15s ease; font-weight: 600;
+  }
+  .mode-tab.active{ color: var(--accent); background: var(--panel-alt); border: 1px solid var(--border-bright); }
+  .mode-tab:hover:not(.active){ color: var(--text); }
+
+  .hud-stats-bar{
+    display:flex; align-items:center; gap:10px; font-family: var(--mono); font-size:10px;
+    color: var(--text-dim);
+  }
+  .hud-stat-pill{
+    display:flex; align-items:center; gap:5px; background: var(--panel);
+    padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border);
+  }
+  .hud-stat-pill span.val{ color: var(--text); font-weight: 600; }
+  .hud-stat-pill span.val.accent{ color: var(--accent); }
+
+  /* ---------- STAGE (VIDEO CONTAINER) ---------- */
+  .stage{
+    position:relative; flex:1; background: #030508;
+    background-image:
+      radial-gradient(circle at center, rgba(14, 25, 38, 0.4) 0%, rgba(3, 5, 8, 0.98) 100%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 32px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 32px);
+    border:1px solid var(--border); border-radius:6px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; min-height:0;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.85);
+  }
+
+  .stage-inner-wrap{
+    position:relative; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .stage video{
+    max-width:100%; max-height:100%; width:100%; height:100%;
+    object-fit:contain; display:block;
+  }
+  .stage canvas.overlay{
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index: 4;
+  }
+
+  /* HUD Reticles & Badges */
+  .stage-reticle{
+    position:absolute; width:18px; height:18px; border-color: rgba(0, 240, 181, 0.4);
+    pointer-events:none; z-index: 5;
+  }
+  .stage-reticle.tl{ top:12px; left:12px; border-top:2px solid; border-left:2px solid; }
+  .stage-reticle.tr{ top:12px; right:12px; border-top:2px solid; border-right:2px solid; }
+  .stage-reticle.bl{ bottom:12px; left:12px; border-bottom:2px solid; border-left:2px solid; }
+  .stage-reticle.br{ bottom:12px; right:12px; border-bottom:2px solid; border-right:2px solid; }
+
+  .stage-hud-meta{
+    position:absolute; top:14px; left:22px; z-index:5;
+    display:flex; gap:8px; font-family: var(--mono); font-size:10px;
+    letter-spacing:.8px; pointer-events:none;
+  }
+  .hud-badge{
+    background: rgba(11, 15, 22, 0.85); backdrop-filter: blur(4px);
+    padding: 4px 8px; border-radius: 3px; border: 1px solid var(--border);
+    color: var(--text-dim); display:flex; align-items:center; gap:5px;
+  }
+  .hud-badge.live-rec{ border-color: rgba(255, 61, 61, 0.4); color: var(--alert); }
+  .hud-badge.live-rec .rec-dot{
+    width:6px; height:6px; border-radius:50%; background: var(--alert);
+    animation: pulse 1s infinite;
+  }
+
+  .stage.scanning::after{
+    content:""; position:absolute; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scan 2.5s linear infinite; opacity:.4; z-index:3;
+  }
+  @keyframes scan{ 0%{ top:0; } 100%{ top:100%; } }
+
+  .stage-empty{
+    text-align:center; color: var(--text-dimmer); font-family: var(--mono); font-size:12px;
+    letter-spacing: 1px; padding: 30px; display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .stage-empty .icon-crosshair{
+    width: 44px; height: 44px; stroke: var(--border-bright); margin-bottom: 2px; opacity: 0.5;
+  }
+  .stage-empty .big{ font-size:13px; font-weight:700; color: var(--text-dim); letter-spacing:2px; }
+
+  .stage-controls{
+    display:flex; align-items:center; gap:12px; margin-top:10px;
+  }
+  .btn{
+    font-family: var(--sans); font-size:12px; font-weight:600;
+    padding: 8px 16px; border-radius:4px; border:1px solid var(--border-bright);
+    background: var(--panel); color: var(--text); cursor:pointer;
+    transition: all .15s ease; display:flex; align-items:center; gap:6px;
+  }
+  .btn:hover{ border-color: var(--text-dim); background: var(--panel-alt); }
+  .btn:active{ transform: scale(0.98); }
+  .btn.primary{
+    background: var(--accent); color:#02120E; border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+  .btn.primary:hover{ filter: brightness(1.12); }
+  .btn.danger{
+    background: var(--alert); color:#1A0505; border-color: var(--alert);
+    box-shadow: 0 0 14px var(--alert-glow);
+  }
+
+  .dropzone{
+    flex:1; border:1px dashed var(--border-bright); border-radius:4px;
+    padding: 8px 14px; font-size:11px; color: var(--text-dim);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background: var(--panel); transition: border-color .2s ease;
+  }
+  .dropzone:hover{ border-color: var(--accent); }
+  .dropzone input{ font-size:11px; color: var(--text-dim); cursor:pointer; }
+  .dropzone input::file-selector-button{
+    font-family: var(--sans); font-size:10px; font-weight:600;
+    padding: 4px 10px; border-radius:3px; border:1px solid var(--border-bright);
+    background: var(--panel-alt); color: var(--text); cursor:pointer; margin-right:10px;
+    transition: all .15s ease;
+  }
+  .dropzone input::file-selector-button:hover{ border-color: var(--accent); color: var(--accent); }
+  .latency{ font-family: var(--mono); font-size:10px; color: var(--text-dimmer); margin-left:auto; }
+
+  /* ---------- SIDEBAR & PANELS ---------- */
+  .sidebar{
+    width: 380px; flex-shrink:0; border-left:1px solid var(--border);
+    display:flex; flex-direction:column; background: var(--panel);
+    overflow-y: auto; overflow-x: hidden;
+  }
+  .sidebar::-webkit-scrollbar{ width: 5px; }
+  .sidebar::-webkit-scrollbar-thumb{ background: var(--border-bright); border-radius: 3px; }
+
+  .panel{ border-bottom:1px solid var(--border); padding: 14px 16px; flex-shrink: 0; }
+  .panel h2{
+    font-family: var(--mono); font-size:11px; letter-spacing:1.5px;
+    color: var(--text-dimmer); text-transform:uppercase; margin-bottom:10px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .panel h2 .sub{ font-size:10px; color: var(--text-dimmer); font-weight: normal; }
+
+  /* ---------- AI INTELLIGENCE PANEL (NEMOTRON HERO) ---------- */
+  .ai-hero-panel{
+    background: linear-gradient(180deg, rgba(16, 22, 34, 0.98) 0%, rgba(10, 14, 22, 0.98) 100%);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 14px 16px; position: relative;
+    flex-shrink: 0; width: 100%; display: block; visibility: visible; opacity: 1;
+  }
+  .ai-hero-panel::before{
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.6;
+  }
+  .ai-hero-header{
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+  }
+  .ai-hero-title{
+    display: flex; flex-direction: column;
+  }
+  .ai-hero-main-title{
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    color: var(--accent); letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px;
+  }
+  .ai-hero-sub-title{
+    font-family: var(--mono); font-size: 9px; color: var(--text-dim); letter-spacing: 0.8px; margin-top: 2px;
+  }
+  .ai-status-tag{
+    font-family: var(--mono); font-size: 9px; padding: 3px 8px;
+    border-radius: 3px; background: rgba(0, 240, 181, 0.1); color: var(--accent);
+    border: 1px solid var(--accent-dim); letter-spacing: 0.8px; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .ai-status-tag.loading{ background: rgba(255, 179, 0, 0.12); color: var(--warn); border-color: var(--warn-dim); }
+  .ai-status-tag.critical{ background: var(--alert-dim); color: var(--alert); border-color: var(--alert); }
+
+  .ai-card{
+    background: var(--panel-alt); border: 1px solid var(--border);
+    border-radius: 5px; padding: 10px 12px; font-size: 11px; line-height: 1.45;
+  }
+  .ai-block-title{
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;
+  }
+  .ai-block-text{ color: var(--text); margin-bottom: 8px; font-size: 11px; }
+  .ai-reason-text{ color: var(--text-dim); margin-bottom: 8px; font-size: 11px; }
+  .ai-action-box{
+    background: rgba(0, 240, 181, 0.05); border-left: 2.5px solid var(--accent);
+    padding: 6px 10px; border-radius: 2px; color: var(--text); font-size: 11px; margin-top: 4px;
+  }
+  .ai-action-box strong{ color: var(--accent); font-family: var(--mono); font-size: 9px; text-transform: uppercase; margin-right: 4px; }
+
+  /* ---------- THREAT INDEX PANEL ---------- */
+  .threat-gauge-wrap{
+    background: var(--panel-alt); border: 1px solid var(--border);
+    border-radius: 5px; padding: 10px 12px; margin-bottom: 12px;
+  }
+  .threat-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .threat-title{ font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .threat-score-val{ font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--text); }
+  .threat-level{ font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+  .threat-level.nominal{ color: var(--accent); }
+  .threat-level.elevated{ color: var(--warn); }
+  .threat-level.critical{ color: var(--alert); }
+
+  .threat-bar-track{
+    height: 8px; width: 100%; background: #070B10; border-radius: 4px;
+    overflow:hidden; position:relative; border: 1px solid rgba(255,255,255,0.05);
+  }
+  .threat-bar-fill{
+    height: 100%; width: 0%; background: var(--accent);
+    border-radius: 4px; transition: width .4s ease, background .4s ease;
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
+  .threat-bar-fill.elevated{ background: var(--warn); box-shadow: 0 0 10px rgba(255, 179, 0, 0.3); }
+  .threat-bar-fill.critical{ background: var(--alert); box-shadow: 0 0 10px var(--alert-glow); }
+
+  .stat-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-box{
+    background: var(--panel-alt); border: 1px solid var(--border);
+    border-radius: 4px; padding: 8px 10px;
+  }
+  .stat-label{ font-size:10px; color: var(--text-dim); margin-bottom:2px; }
+  .stat-value{ font-family: var(--mono); font-size:16px; font-weight:700; color: var(--text); }
+  .stat-value.accent{ color: var(--accent); }
+  .stat-value.alert{ color: var(--alert); }
+
+  /* ---------- ACTIVE TRACKS PANEL ---------- */
+  .tracks-scroll{ max-height: 130px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .tracks-scroll::-webkit-scrollbar{ width: 4px; }
+  .tracks-scroll::-webkit-scrollbar-thumb{ background: var(--border-bright); border-radius: 2px; }
+
+  .track-card{
+    background: var(--panel-alt); border: 1px solid var(--border);
+    border-radius: 4px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; transition: border-color .15s ease;
+  }
+  .track-card:hover{ border-color: var(--border-bright); }
+  .track-card-id{ font-family: var(--mono); font-weight: 700; color: var(--accent); }
+  .track-card-label{ text-transform: uppercase; color: var(--text); font-weight: 600; margin-left: 6px; }
+  .track-card-meta{ font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .track-card-threat{
+    font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 2px;
+  }
+  .track-card-threat.high{ background: var(--alert-dim); color: var(--alert); }
+  .track-card-threat.moderate{ background: var(--warn-dim); color: var(--warn); }
+  .track-card-threat.low{ background: rgba(0, 240, 181, 0.1); color: var(--accent); }
+
+  /* ---------- SECURITY TIMELINE / LOG ---------- */
+  .log-list{ max-height: 190px; overflow-y:auto; padding-right: 2px; }
+  .log-empty{ font-size:11px; color: var(--text-dimmer); padding: 12px 0; text-align:center; font-family: var(--mono); }
+  
+  .log-entry{
+    display:flex; gap:10px; align-items:center; padding:8px 10px;
+    border-radius: 4px; margin-bottom: 6px; font-size:11px;
+    background: var(--panel-alt); border: 1px solid var(--border);
+    animation: slidein .2s ease; transition: border-color .15s ease; cursor: pointer;
+  }
+  .log-entry:hover{ border-color: var(--border-bright); }
+  @keyframes slidein{ from{ opacity:0; transform: translateY(-4px);} to{ opacity:1; transform:translateY(0);} }
+  
+  .log-entry.critical{ border-left: 3px solid var(--alert); }
+  .log-entry.elevated{ border-left: 3px solid var(--warn); }
+  .log-entry.info{ border-left: 3px solid var(--info); }
+
+  .log-entry img.thumb{
+    width:48px; height:34px; object-fit:cover; border-radius:3px; flex-shrink:0;
+    border:1px solid var(--border); cursor:pointer; transition: transform .15s ease;
+  }
+  .log-entry img.thumb:hover{ border-color: var(--accent); transform: scale(1.05); }
+  .log-entry .body{ flex:1; min-width:0; }
+  .log-entry .head-line{ display:flex; justify-content:space-between; align-items:center; }
+  .log-entry .label{ color: var(--text); font-weight: 600; text-transform: capitalize; }
+  .log-entry .badge{
+    font-family: var(--mono); font-size: 8px; padding: 1px 4px;
+    border-radius: 2px; font-weight: 700;
+  }
+  .log-entry.critical .badge{ background: var(--alert-dim); color: var(--alert); }
+  .log-entry.elevated .badge{ background: var(--warn-dim); color: var(--warn); }
+  .log-entry.info .badge{ background: rgba(0, 180, 216, 0.15); color: var(--info); }
+  .log-entry .meta{ font-family: var(--mono); color: var(--text-dim); font-size:10px; margin-top:2px; }
+
+  .log-list::-webkit-scrollbar{ width:4px; }
+  .log-list::-webkit-scrollbar-thumb{ background: var(--border-bright); border-radius:2px; }
+
+  /* ---------- WATCHLIST & ACTIVITY ---------- */
+  .watchlist-scroll{ max-height: 100px; overflow-y: auto; padding-right: 4px; }
+  .watchlist-scroll::-webkit-scrollbar{ width:4px; }
+  .watchlist-scroll::-webkit-scrollbar-thumb{ background: var(--border-bright); border-radius:2px; }
+
+  .watchlist-item{
+    display:flex; align-items:center; gap:8px; padding:4px 6px; font-size:11px;
+    border-radius: 3px; transition: background .15s ease;
+  }
+  .watchlist-item:hover{ background: var(--panel-alt); }
+  .watchlist-item input{ accent-color: var(--alert); width:13px; height:13px; cursor:pointer; }
+  .watchlist-item label{ flex:1; color: var(--text); cursor:pointer; font-weight:500; }
+  .watchlist-item .count{ font-family: var(--mono); font-size:10px; color: var(--text-dimmer); min-width:16px; text-align:right; }
+  .watchlist-item .count.has-value{ color: var(--warn); font-weight: 700; }
+
+  .activity-chart{ width:100%; height:50px; display:block; border-radius:3px; }
+
+  /* ---------- COPILOT DRAWER / MODAL ---------- */
+  .copilot-btn{
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    padding: 5px 10px; border-radius: 4px; border: 1px solid var(--accent-dim);
+    background: rgba(0, 240, 181, 0.08); color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; gap: 5px; transition: all .2s ease;
+    letter-spacing: 0.8px; margin-top: 8px; width: 100%; justify-content: center;
+  }
+  .copilot-btn:hover{
+    background: rgba(0, 240, 181, 0.16); border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .copilot-modal{
+    position: fixed; bottom: 16px; right: 16px; width: 390px; height: 530px;
+    background: var(--panel); border: 1px solid var(--border-bright);
+    border-radius: 8px; box-shadow: 0 16px 50px rgba(0,0,0,0.9);
+    display: none; flex-direction: column; z-index: 120;
+    overflow: hidden; backdrop-filter: blur(12px);
+    animation: slidein .25s ease;
+  }
+  .copilot-header{
+    padding: 10px 14px; background: var(--panel-alt);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .copilot-title{
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    color: var(--text); letter-spacing: 1px; display: flex; align-items: center; gap: 6px;
+  }
+  .copilot-title span{ color: var(--accent); }
+  .copilot-subtitle{ font-size: 9px; color: var(--text-dim); }
+  .copilot-close{
+    background: transparent; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 15px; padding: 2px 6px; border-radius: 3px;
+  }
+  .copilot-close:hover{ color: var(--text); background: rgba(255,255,255,0.06); }
+
+  .copilot-messages{
+    flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .copilot-messages::-webkit-scrollbar{ width: 4px; }
+  .copilot-messages::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 2px; }
+
+  .copilot-msg{
+    max-width: 90%; font-size: 11px; line-height: 1.45; padding: 8px 11px;
+    border-radius: 5px; animation: slidein .15s ease; word-break: break-word;
+  }
+  .copilot-msg.user{
+    background: var(--accent-dim); color: var(--text); align-self: flex-end;
+    border-bottom-right-radius: 1px; border: 1px solid rgba(0, 240, 181, 0.2);
+  }
+  .copilot-msg.assistant{
+    background: var(--panel-alt); color: var(--text); align-self: flex-start;
+    border-bottom-left-radius: 1px; border: 1px solid var(--border);
+  }
+  .copilot-msg.assistant .tag{
+    font-family: var(--mono); font-size: 9px; color: var(--accent);
+    font-weight: 700; margin-bottom: 3px; display: block; letter-spacing: 0.5px;
+  }
+  .copilot-quick-prompts{
+    padding: 6px 10px; display: flex; gap: 5px; overflow-x: auto;
+    border-top: 1px solid rgba(255,255,255,0.04); background: rgba(0,0,0,0.25);
+  }
+  .copilot-quick-prompts::-webkit-scrollbar{ height: 3px; }
+  .copilot-quick-prompts button{
+    font-family: var(--mono); font-size: 9px; white-space: nowrap;
+    background: var(--panel-alt); border: 1px solid var(--border);
+    color: var(--text-dim); padding: 4px 7px; border-radius: 3px; cursor: pointer;
+    transition: all .15s ease;
+  }
+  .copilot-quick-prompts button:hover{ border-color: var(--accent); color: var(--text); }
+
+  .copilot-input-bar{
+    padding: 8px 10px; border-top: 1px solid var(--border);
+    display: flex; gap: 6px; background: var(--panel);
+  }
+  .copilot-input-bar input{
+    flex: 1; background: var(--panel-alt); border: 1px solid var(--border);
+    border-radius: 4px; padding: 7px 10px; color: var(--text); font-size: 11px;
+    outline: none; font-family: var(--sans);
+  }
+  .copilot-input-bar input:focus{ border-color: var(--accent); }
+  .copilot-input-bar button{
+    background: var(--accent); color: #03120E; border: none;
+    border-radius: 4px; padding: 0 12px; font-weight: 700; font-size: 11px;
+    cursor: pointer; transition: opacity .15s ease;
+  }
+  .copilot-input-bar button:hover{ filter: brightness(1.1); }
+  .copilot-input-bar button:disabled{ opacity: 0.4; cursor: not-allowed; }
+
+  /* LIGHTBOX */
+  .lightbox{
+    position:fixed; inset:0; background: rgba(3,5,8,0.94);
+    display:none; align-items:center; justify-content:center; z-index:100;
+    padding: 24px; backdrop-filter: blur(6px);
+  }
+  .lightbox-inner{
+    background: var(--panel); border:1px solid var(--border-bright); border-radius:6px;
+    padding: 16px; max-width: 640px; width:100%; box-shadow: 0 10px 40px rgba(0,0,0,0.85);
+  }
+  .lightbox-inner img{ width:100%; border-radius:4px; display:block; border: 1px solid var(--border); }
+  .lightbox-meta{ font-family: var(--mono); font-size:11px; color: var(--text-dim); margin:12px 0; }
+
+  @media (max-width: 900px){
+    .workspace{ flex-direction:column; overflow-y: auto; }
+    .sidebar{ width:100%; border-left:none; border-top:1px solid var(--border); max-height: none; }
+    .copilot-modal{ width: calc(100% - 32px); height: 440px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- COMMAND CENTER HEADER -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="title-wrap">
+        <div class="mark">ARGUS<span>•</span>AI</div>
+        <div class="subtitle">Surveillance Intelligence Command Center</div>
+      </div>
+    </div>
+
+    <!-- Status Indicators -->
+    <div class="system-indicators">
+      <div class="ind-pill on" id="indSystem"><span class="dot"></span>SYSTEM ONLINE</div>
+      <div class="ind-pill on" id="indVision"><span class="dot"></span>VISION ONLINE</div>
+      <div class="ind-pill on" id="indTracking"><span class="dot"></span>TRACKING ONLINE</div>
+      <div class="ind-pill on" id="indNemotron"><span class="dot"></span>NEMOTRON ONLINE</div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="btn-export" id="exportBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Export Briefing
+      </button>
+      <div class="clock" id="clock">00:00:00</div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="workspace">
+    
+    <!-- 1. VIDEO SURVEILLANCE FEED -->
+    <section class="viewport">
+      <div class="viewport-header">
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="tabLive" data-mode="live">LIVE OPTICAL / THERMAL</button>
+          <button class="mode-tab" id="tabUpload" data-mode="upload">FOOTAGE PLAYBACK</button>
+        </div>
+        <div class="hud-stats-bar">
+          <div class="hud-stat-pill">RES: <span class="val" id="hudRes">—</span></div>
+          <div class="hud-stat-pill">ASPECT: <span class="val" id="hudAspect">—</span></div>
+          <div class="hud-stat-pill">TRACKED: <span class="val accent" id="hudTracked">0</span></div>
+          <div class="hud-stat-pill">MODE: <span class="val" id="statMode">Idle</span></div>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <!-- Corner reticles for tactical styling -->
+        <div class="stage-reticle tl"></div>
+        <div class="stage-reticle tr"></div>
+        <div class="stage-reticle bl"></div>
+        <div class="stage-reticle br"></div>
+
+        <div class="stage-hud-meta" id="stageHudMeta" style="display:none;">
+          <div class="hud-badge live-rec" id="recBadge"><span class="rec-dot"></span> FEED ACTIVE</div>
+          <div class="hud-badge" id="sourceMetaBadge">YOLOv8 + BoT-SORT</div>
+        </div>
+
+        <div class="stage-inner-wrap" id="stageInnerWrap">
+          <video id="liveVideo" autoplay playsinline muted style="display:none;"></video>
+          <canvas class="overlay" id="liveOverlay" style="display:none;"></canvas>
+
+          <video id="uploadVideo" controls style="display:none;"></video>
+          <canvas class="overlay" id="uploadOverlay" style="display:none;"></canvas>
+        </div>
+
+        <canvas id="captureCanvas" hidden></canvas>
+        <canvas id="snapCanvas" hidden></canvas>
+
+        <div class="stage-empty" id="stageEmpty">
+          <svg class="icon-crosshair" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="12" y1="2" x2="12" y2="6"/>
+            <line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="6" y2="12"/>
+            <line x1="18" y1="12" x2="22" y2="12"/>
+          </svg>
+          <div class="big">NO SURVEILLANCE FEED</div>
+          <div>Upload a video or start camera to begin analysis.</div>
+        </div>
+      </div>
+
+      <div class="stage-controls" id="liveControls">
+        <button class="btn primary" id="startBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start Camera
+        </button>
+        <button class="btn danger" id="stopBtn" style="display:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="6" width="12" height="12"/></svg>
+          Stop Camera
+        </button>
+        <div class="latency" id="latencyText">INFERENCE: READY</div>
+      </div>
+
+      <div class="stage-controls" id="uploadControls" style="display:none;">
+        <div class="dropzone">
+          <span id="uploadStatus">Select surveillance video (MP4, WebM, MOV) to process</span>
+          <input type="file" id="fileInput" accept="video/*" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SIDEBAR PANELS -->
+    <aside class="sidebar">
+      
+      <!-- 2. NEMOTRON AI INTELLIGENCE HERO PANEL -->
+      <div class="ai-hero-panel" id="aiPanel">
+        <div class="ai-hero-header">
+          <div class="ai-hero-title">
+            <div class="ai-hero-main-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              AI INTELLIGENCE
+            </div>
+            <div class="ai-hero-sub-title">Powered by NEMOTRON-3.5-LIGHTNING</div>
+          </div>
+          <div class="ai-status-tag" id="aiStatusBadge">● NEMOTRON ONLINE</div>
+        </div>
+        
+        <div class="ai-card" id="aiCard">
+          <div class="ai-block-title">AI ASSESSMENT</div>
+          <div class="ai-block-text" id="aiLead">NO ACTIVE INTELLIGENCE — Upload footage or start camera feed to begin AI analysis.</div>
+          
+          <div class="ai-block-title">WHY FLAGGED / BEHAVIORAL ANALYSIS</div>
+          <div class="ai-reason-text" id="aiReason">Telemetry monitoring standing by for target classifications and movement vectors.</div>
+          
+          <div class="ai-action-box" id="aiActionBox">
+            <strong>RECOMMENDED ACTION:</strong> <span id="aiActionText">Select video file or start live stream.</span>
+          </div>
+        </div>
+
+        <button class="copilot-btn" id="openCopilotBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Open ARGUS Copilot
+        </button>
+      </div>
+
+      <!-- 3. THREAT INDEX PANEL -->
+      <div class="panel status-panel">
+        <h2>Threat Index <span class="sub" id="threatIndexNum">INDEX: 0 / 100</span></h2>
+        
+        <div class="threat-gauge-wrap">
+          <div class="threat-header">
+            <span class="threat-title">DETERMINISTIC THREAT LEVEL</span>
+            <span class="threat-level nominal" id="threatLevelText">NOMINAL</span>
+          </div>
+          <div class="threat-bar-track">
+            <div class="threat-bar-fill" id="threatBarFill"></div>
+          </div>
+          <div style="font-size:9px; color:var(--text-dimmer); margin-top:5px; font-family:var(--mono);">Calculated by ARGUS Threat Engine · Interpreted by Nemotron</div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-label">Objects in Frame</div>
+            <div class="stat-value accent" id="statObjects">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Security Alerts</div>
+            <div class="stat-value alert" id="statAlerts">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Session Duration</div>
+            <div class="stat-value" id="statElapsed">00:00</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Active Mode</div>
+            <div class="stat-value" id="statModeSecondary" style="font-size:13px; margin-top:2px;">Idle</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. ACTIVE TRACKED ENTITIES PANEL -->
+      <div class="panel tracks-panel">
+        <h2>Active Tracked Entities <span class="sub" id="activeTracksCountBadge">0 TRACKS</span></h2>
+        <div class="tracks-scroll" id="activeTracksList">
+          <div style="font-size:11px; color:var(--text-dimmer); text-align:center; padding:10px 0; font-family:var(--mono);" id="noTracksMsg">NO ACTIVE TRACKS</div>
+        </div>
+      </div>
+
+      <!-- 5. SECURITY TIMELINE / EVENT LOG -->
+      <div class="panel log-panel">
+        <h2>Security Timeline & Log <span class="sub" id="logCountBadge">0 EVENTS</span></h2>
+        <div class="log-list" id="logList">
+          <div class="log-empty" id="logEmpty">NO ACTIVE SECURITY EVENTS</div>
+        </div>
+      </div>
+
+      <!-- 6. WATCHLIST & DENSITY -->
+      <div class="panel watchlist-panel">
+        <h2>Target Watchlist Filters <span class="sub">Active Classes</span></h2>
+        <div class="watchlist-scroll" id="watchlistItems"></div>
+      </div>
+
+      <div class="panel activity-panel">
+        <h2>Target Density Profile</h2>
+        <canvas class="activity-chart" id="activityChart"></canvas>
+      </div>
+
+    </aside>
+  </main>
+</div>
+
+<!-- LIGHTBOX FOR EVIDENCE SNAPSHOTS -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+    <img id="lightboxImg" src="" alt="" />
+    <div class="lightbox-meta" id="lightboxMeta"></div>
+    <button class="btn" id="lightboxClose">Close Evidence Snapshot</button>
+  </div>
+</div>
+
+<!-- 7. COPILOT DRAWER -->
+<div class="copilot-modal" id="copilotModal">
+  <div class="copilot-header">
+    <div class="copilot-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      ARGUS <span>COPILOT</span>
+    </div>
+    <div class="copilot-subtitle">Powered by Nemotron-3.5-Lightning</div>
+    <button class="copilot-close" id="closeCopilotBtn">✕</button>
+  </div>
+
+  <div class="copilot-messages" id="copilotMessages">
+    <div class="copilot-msg assistant">
+      <span class="tag">ARGUS COPILOT</span>
+      Hello. I am ARGUS Copilot powered by Nemotron-3.5-Lightning. Ask me direct questions about current session telemetry, tracking patterns, or security alerts.
+    </div>
+  </div>
+
+  <div class="copilot-quick-prompts">
+    <button class="copilot-prompt-btn">Who are you?</button>
+    <button class="copilot-prompt-btn">What happened in this session?</button>
+    <button class="copilot-prompt-btn">Are there any threats?</button>
+    <button class="copilot-prompt-btn">Which target moved the most?</button>
+    <button class="copilot-prompt-btn">Why was this target flagged?</button>
+    <button class="copilot-prompt-btn">Identify tracking patterns</button>
+    <button class="copilot-prompt-btn">Give me a security briefing</button>
+  </div>
+
+  <div class="copilot-input-bar">
+    <input type="text" id="copilotInput" placeholder="Ask ARGUS about this session..." autocomplete="off" />
+    <button id="copilotSendBtn">Send</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- Config & Threat Weights ----------
+  const WATCHLIST_OPTIONS = [
+    "person", "backpack", "suitcase", "knife", "cell phone",
+    "laptop", "car", "bicycle", "dog", "bottle"
+  ];
+  const CRITICAL_CLASSES = new Set(["knife"]);
+  const ELEVATED_CLASSES = new Set(["backpack", "suitcase", "person"]);
+  const DEFAULT_ON = new Set(["person", "backpack", "suitcase", "knife", "cell phone"]);
+  const WS_URL = `ws://${location.host}/ws/live`;
+  const CAPTURE_INTERVAL_MS = 600;
+  const CAPTURE_WIDTH = 480;
+  const ACTIVITY_MAX_POINTS = 40;
+  const MAX_CAPTURES = 100;
+
+  // ---------- State ----------
+  let mode = "live";
+  let watchlist = new Set(DEFAULT_ON);
+  let alertCount = 0;
+  let classCounts = {};
+  let captures = [];
+  let activityHistory = [];
+  let sessionStart = null;
+  let elapsedTimer = null;
+
+  let liveStream = null;
+  let liveWS = null;
+  let liveCaptureTimer = null;
+  let livePrevActive = new Set();
+  let lastSendTime = 0;
+
+  let uploadTimeline = [];
+  let uploadPrevActive = new Set();
+  let lastActivityEntryTime = null;
+
+  // History tracking for breadcrumbs (trackId -> [{x, y, time}])
+  const trackTrails = new Map();
+  // Map of active tracks for active tracks UI card list
+  const activeTracksMap = new Map();
+
+  // ---------- DOM References ----------
+  const $ = (id) => document.getElementById(id);
+  const tabLive = $("tabLive"), tabUpload = $("tabUpload");
+  const stage = $("stage"), stageEmpty = $("stageEmpty"), stageHudMeta = $("stageHudMeta");
+  const liveVideo = $("liveVideo"), liveOverlay = $("liveOverlay");
+  const uploadVideo = $("uploadVideo"), uploadOverlay = $("uploadOverlay");
+  const captureCanvas = $("captureCanvas"), snapCanvas = $("snapCanvas");
+  const liveControls = $("liveControls"), uploadControls = $("uploadControls");
+  const startBtn = $("startBtn"), stopBtn = $("stopBtn");
+  const fileInput = $("fileInput"), uploadStatus = $("uploadStatus");
+  const latencyText = $("latencyText");
+  const indNemotron = $("indNemotron");
+  const statMode = $("statMode"), statModeSecondary = $("statModeSecondary");
+  const statObjects = $("statObjects");
+  const statAlerts = $("statAlerts"), statElapsed = $("statElapsed");
+  const hudRes = $("hudRes"), hudAspect = $("hudAspect"), hudTracked = $("hudTracked");
+  const threatBarFill = $("threatBarFill"), threatLevelText = $("threatLevelText"), threatIndexNum = $("threatIndexNum");
+  const logList = $("logList"), logCountBadge = $("logCountBadge");
+  let logEmpty = $("logEmpty");
+  const activeTracksList = $("activeTracksList"), activeTracksCountBadge = $("activeTracksCountBadge");
+  const watchlistItems = $("watchlistItems");
+  const clockEl = $("clock");
+  const activityChart = $("activityChart");
+  const lightbox = $("lightbox"), lightboxImg = $("lightboxImg"), lightboxMeta = $("lightboxMeta");
+
+  const aiStatusBadge = $("aiStatusBadge");
+  const aiLead = $("aiLead"), aiReason = $("aiReason"), aiActionBox = $("aiActionBox"), aiActionText = $("aiActionText");
+  const copilotModal = $("copilotModal"), openCopilotBtn = $("openCopilotBtn"), closeCopilotBtn = $("closeCopilotBtn");
+  const copilotMessages = $("copilotMessages"), copilotInput = $("copilotInput"), copilotSendBtn = $("copilotSendBtn");
+  const copilotPromptBtns = document.querySelectorAll(".copilot-prompt-btn");
+  
+  let currentThreatLevel = "NOMINAL";
+  let lastThreatScore = 0;
+
+  // ---------- Clock ----------
+  function tickClock(){
+    clockEl.textContent = new Date().toLocaleTimeString("en-GB");
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // ---------- Watchlist UI ----------
+  function watchlistId(label){ return "wl_" + label.replace(/\s+/g, "_"); }
+
+  function renderWatchlist(){
+    watchlistItems.innerHTML = "";
+    WATCHLIST_OPTIONS.forEach((label) => {
+      const id = watchlistId(label);
+      const row = document.createElement("div");
+      row.className = "watchlist-item";
+      row.innerHTML = `
+        <input type="checkbox" id="${id}" ${watchlist.has(label) ? "checked" : ""} />
+        <label for="${id}">${label}</label>
+        <span class="count" id="cnt_${id}">${classCounts[label] || ""}</span>
+      `;
+      row.querySelector("input").addEventListener("change", (e) => {
+        if (e.target.checked) watchlist.add(label); else watchlist.delete(label);
+        updateThreatScore([]);
+      });
+      watchlistItems.appendChild(row);
+    });
+  }
+  renderWatchlist();
+
+  fetch("/api/classes")
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.default_watchlist && data.default_watchlist.length){
+        data.default_watchlist.forEach((c) => watchlist.add(c));
+        renderWatchlist();
+      }
+    })
+    .catch(() => { /* fallback */ });
+
+  function bumpClassCount(label){
+    classCounts[label] = (classCounts[label] || 0) + 1;
+    const el = document.getElementById("cnt_" + watchlistId(label));
+    if (el){ el.textContent = classCounts[label]; el.classList.add("has-value"); }
+  }
+
+  // ---------- Live Mode HUD ----------
+  function setLiveMode(active){
+    stage.classList.toggle("scanning", active);
+    stageHudMeta.style.display = active ? "flex" : "none";
+  }
+
+  function startElapsedTimer(getSeconds){
+    clearInterval(elapsedTimer);
+    elapsedTimer = setInterval(() => {
+      const s = Math.floor(getSeconds());
+      const mm = String(Math.floor(s / 60)).padStart(2, "0");
+      const ss = String(s % 60).padStart(2, "0");
+      statElapsed.textContent = `${mm}:${ss}`;
+    }, 500);
+  }
+
+  // ---------- Threat Scoring ----------
+  function updateThreatScore(detections){
+    if (!detections || !detections.length){
+      threatBarFill.style.width = "4%";
+      threatBarFill.className = "threat-bar-fill";
+      threatLevelText.textContent = "NOMINAL";
+      threatLevelText.className = "threat-level nominal";
+      threatIndexNum.textContent = "INDEX: 0 / 100";
+      return;
+    }
+
+    let score = 10;
+    let hasCritical = false;
+    let hasElevated = false;
+
+    detections.forEach((d) => {
+      if (CRITICAL_CLASSES.has(d.label)){
+        score += 45;
+        hasCritical = true;
+      } else if (ELEVATED_CLASSES.has(d.label)){
+        score += 15;
+        hasElevated = true;
+      } else {
+        score += 5;
+      }
+    });
+
+    score = Math.min(100, Math.max(0, score));
+    threatBarFill.style.width = `${score}%`;
+    threatIndexNum.textContent = `INDEX: ${score} / 100`;
+
+    if (hasCritical || score >= 65){
+      threatBarFill.className = "threat-bar-fill critical";
+      threatLevelText.textContent = "CRITICAL";
+      threatLevelText.className = "threat-level critical";
+    } else if (hasElevated || score >= 35){
+      threatBarFill.className = "threat-bar-fill elevated";
+      threatLevelText.textContent = "ELEVATED";
+      threatLevelText.className = "threat-level elevated";
+    } else {
+      threatBarFill.className = "threat-bar-fill";
+      threatLevelText.textContent = "NOMINAL";
+      threatLevelText.className = "threat-level nominal";
+    }
+
+    if (typeof explainThreat === 'function') {
+      explainThreat(score, threatLevelText.textContent);
+    }
+  }
+
+  // ---------- Active Tracks Panel Rendering ----------
+  function updateActiveTracksUI(detections){
+    if (!detections || !detections.length){
+      activeTracksList.innerHTML = `<div style="font-size:11px; color:var(--text-dimmer); text-align:center; padding:10px 0; font-family:var(--mono);" id="noTracksMsg">NO ACTIVE TRACKS</div>`;
+      activeTracksCountBadge.textContent = "0 TRACKS";
+      activeTracksMap.clear();
+      return;
+    }
+
+    const currentTrackIds = new Set();
+    detections.forEach(d => {
+      if (d.track_id !== null && d.track_id !== undefined){
+        currentTrackIds.add(d.track_id);
+        const isCritical = CRITICAL_CLASSES.has(d.label);
+        const isElevated = ELEVATED_CLASSES.has(d.label);
+        const trail = trackTrails.get(d.track_id) || [];
+        let velocity = 0;
+        if (trail.length >= 2){
+          const p1 = trail[trail.length - 1], p2 = trail[trail.length - 2];
+          velocity = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+        const movement_level = velocity > 15 ? "HIGH" : velocity > 4 ? "MODERATE" : "STATIONARY";
+        const threatScore = isCritical ? 85 : isElevated ? 55 : 20;
+
+        activeTracksMap.set(d.track_id, {
+          track_id: d.track_id,
+          label: d.label,
+          confidence: d.confidence,
+          movement_level,
+          velocity: roundVal(velocity, 1),
+          threat: threatScore
+        });
+      }
+    });
+
+    // Remove old tracks not seen
+    for (let id of activeTracksMap.keys()){
+      if (!currentTrackIds.has(id)) activeTracksMap.delete(id);
+    }
+
+    activeTracksCountBadge.textContent = `${activeTracksMap.size} TRACKS`;
+    if (activeTracksMap.size === 0){
+      activeTracksList.innerHTML = `<div style="font-size:11px; color:var(--text-dimmer); text-align:center; padding:10px 0; font-family:var(--mono);">NO ACTIVE TRACKS</div>`;
+      return;
+    }
+
+    activeTracksList.innerHTML = "";
+    Array.from(activeTracksMap.values()).forEach(t => {
+      const card = document.createElement("div");
+      card.className = "track-card";
+      const threatClass = t.threat >= 70 ? "high" : t.threat >= 40 ? "moderate" : "low";
+      card.innerHTML = `
+        <div>
+          <span class="track-card-id">#${t.track_id}</span>
+          <span class="track-card-label">${t.label}</span>
+        </div>
+        <div class="track-card-meta">${t.movement_level}</div>
+        <div class="track-card-threat ${threatClass}">THREAT ${t.threat}</div>
+      `;
+      activeTracksList.appendChild(card);
+    });
+  }
+
+  function roundVal(v, dec){ return Math.round(v * Math.pow(10, dec)) / Math.pow(10, dec); }
+
+  // ---------- Activity Chart ----------
+  function pushActivity(count){
+    activityHistory.push(count);
+    if (activityHistory.length > ACTIVITY_MAX_POINTS) activityHistory.shift();
+    drawActivityChart();
+  }
+
+  function drawActivityChart(){
+    activityChart.width = activityChart.clientWidth;
+    activityChart.height = activityChart.clientHeight;
+    const ctx = activityChart.getContext("2d");
+    ctx.clearRect(0, 0, activityChart.width, activityChart.height);
+    
+    ctx.strokeStyle = "rgba(255,255,255,0.04)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, activityChart.height / 2);
+    ctx.lineTo(activityChart.width, activityChart.height / 2);
+    ctx.stroke();
+
+    if (!activityHistory.length) return;
+    const max = Math.max(1, ...activityHistory);
+    const barW = activityChart.width / ACTIVITY_MAX_POINTS;
+    const pad = Math.max(0, ACTIVITY_MAX_POINTS - activityHistory.length);
+
+    activityHistory.forEach((v, i) => {
+      const x = (pad + i) * barW;
+      const h = Math.max(3, (v / max) * (activityChart.height - 4));
+      ctx.fillStyle = v >= 3 ? "#FF3D3D" : v > 0 ? "#00F0B5" : "#101622";
+      ctx.fillRect(x + 1, activityChart.height - h, Math.max(1, barW - 2), h);
+    });
+  }
+  drawActivityChart();
+
+  // ---------- Snapshot & Lightbox ----------
+  function captureThumbnail(videoEl){
+    if (!videoEl || !videoEl.videoWidth) return null;
+    const targetW = 260;
+    const scale = targetW / videoEl.videoWidth;
+    snapCanvas.width = targetW;
+    snapCanvas.height = videoEl.videoHeight * scale;
+    const ctx = snapCanvas.getContext("2d");
+    ctx.drawImage(videoEl, 0, 0, snapCanvas.width, snapCanvas.height);
+    try { return snapCanvas.toDataURL("image/jpeg", 0.75); }
+    catch (e) { return null; }
+  }
+
+  function openLightbox(entry){
+    lightboxImg.src = entry.thumb;
+    lightboxMeta.textContent = `${entry.label.toUpperCase()} · TIMESTAMP: ${entry.time} · ${(entry.confidence * 100).toFixed(0)}% CONFIDENCE`;
+    lightbox.style.display = "flex";
+  }
+  $("lightboxClose").addEventListener("click", () => lightbox.style.display = "none");
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) lightbox.style.display = "none"; });
+
+  // ---------- Security Log Timeline ----------
+  function pushAlert(label, confidence, videoEl, timestampSec = null, trackId = null){
+    alertCount++;
+    statAlerts.textContent = alertCount;
+    bumpClassCount(label);
+
+    const thumb = captureThumbnail(videoEl);
+    const timeStr = new Date().toLocaleTimeString("en-GB");
+    const entryData = {
+      label, confidence, time: timeStr, timestampSec, trackId, thumb
+    };
+    captures.unshift(entryData);
+    if (captures.length > MAX_CAPTURES) captures.pop();
+
+    if (logEmpty){ logEmpty.remove(); logEmpty = null; }
+    logCountBadge.textContent = `${captures.length} EVENTS`;
+
+    const severity = CRITICAL_CLASSES.has(label) ? "critical" : ELEVATED_CLASSES.has(label) ? "elevated" : "info";
+    const badgeText = severity.toUpperCase();
+
+    const entry = document.createElement("div");
+    entry.className = `log-entry ${severity}`;
+    const trackTag = trackId !== null ? ` (#${trackId})` : "";
+    entry.innerHTML = `
+      ${thumb ? `<img class="thumb" src="${thumb}" alt="${label}" />` : ''}
+      <div class="body">
+        <div class="head-line">
+          <span class="label">${label}${trackTag} DETECTED</span>
+          <span class="badge">${badgeText}</span>
+        </div>
+        <div class="meta">${timeStr} · ${(confidence * 100).toFixed(0)}% conf ${timestampSec !== null ? `· @${timestampSec.toFixed(1)}s` : ''}</div>
+      </div>
+    `;
+
+    if (thumb) {
+      entry.querySelector(".thumb").addEventListener("click", (e) => {
+        e.stopPropagation();
+        openLightbox(entryData);
+      });
+    }
+
+    entry.addEventListener("click", () => {
+      if (mode === "upload" && timestampSec !== null && uploadVideo){
+        uploadVideo.currentTime = Math.max(0, timestampSec - 0.5);
+        uploadVideo.play();
+      }
+    });
+
+    logList.prepend(entry);
+    while (logList.children.length > 150) logList.removeChild(logList.lastChild);
+
+    if (typeof analyzeEvent === 'function') {
+      analyzeEvent(label, confidence, timestampSec, severity, trackId);
+    }
+  }
+
+  // ---------- Geometry & Box Rendering ----------
+  function fitRect(container, vw, vh){
+    const cw = container.clientWidth, ch = container.clientHeight;
+    if (!vw || !vh) {
+      return { scale: 1, offX: 0, offY: 0, w: cw, h: ch };
+    }
+    const scale = Math.min(cw / vw, ch / vh);
+    const w = vw * scale;
+    const h = vh * scale;
+    const offX = (cw - w) / 2;
+    const offY = (ch - h) / 2;
+    return { scale, offX, offY, w, h };
+  }
+
+  function updateHUDDimensions(vw, vh){
+    if (!vw || !vh){
+      hudRes.textContent = "—";
+      hudAspect.textContent = "—";
+      return;
+    }
+    hudRes.textContent = `${vw}×${vh}`;
+    const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+    const d = gcd(vw, vh);
+    const aspectW = Math.round(vw / d);
+    const aspectH = Math.round(vh / d);
+    if (vw < vh){
+      hudAspect.textContent = `${aspectW}:${aspectH} [PORTRAIT]`;
+    } else {
+      hudAspect.textContent = `${aspectW}:${aspectH} [LANDSCAPE]`;
+    }
+  }
+
+  function drawDetections(canvas, videoEl, detections){
+    const vw = videoEl.videoWidth;
+    const vh = videoEl.videoHeight;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!vw || !vh){
+      return;
+    }
+
+    updateHUDDimensions(vw, vh);
+    updateThreatScore(detections);
+    updateActiveTracksUI(detections);
+
+    if (!detections || !detections.length){
+      hudTracked.textContent = "0";
+      return;
+    }
+
+    const fit = fitRect(canvas, vw, vh);
+    let trackedCount = 0;
+
+    detections.forEach((d) => {
+      const [x1, y1, x2, y2] = d.box;
+      const px = fit.offX + x1 * fit.w;
+      const py = fit.offY + y1 * fit.h;
+      const pw = (x2 - x1) * fit.w;
+      const ph = (y2 - y1) * fit.h;
+      const isCritical = CRITICAL_CLASSES.has(d.label);
+      const isWatched = watchlist.has(d.label);
+      const color = isCritical ? "#FF3D3D" : isWatched ? "#FFB300" : "#00F0B5";
+
+      if (d.track_id !== null && d.track_id !== undefined){
+        trackedCount++;
+        const center = { x: px + pw / 2, y: py + ph / 2 };
+        if (!trackTrails.has(d.track_id)){
+          trackTrails.set(d.track_id, []);
+        }
+        const trail = trackTrails.get(d.track_id);
+        trail.push(center);
+        if (trail.length > 14) trail.shift();
+
+        if (trail.length > 1){
+          ctx.beginPath();
+          ctx.moveTo(trail[0].x, trail[0].y);
+          for (let i = 1; i < trail.length; i++){
+            ctx.lineTo(trail[i].x, trail[i].y);
+          }
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([3, 3]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = isCritical ? 2.5 : isWatched ? 2 : 1.5;
+      ctx.strokeRect(px, py, pw, ph);
+
+      // Corner reticle brackets
+      const cornerLen = Math.min(12, pw / 3, ph / 3);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      // Top left
+      ctx.moveTo(px, py + cornerLen); ctx.lineTo(px, py); ctx.lineTo(px + cornerLen, py);
+      // Top right
+      ctx.moveTo(px + pw - cornerLen, py); ctx.lineTo(px + pw, py); ctx.lineTo(px + pw, py + cornerLen);
+      // Bottom left
+      ctx.moveTo(px, py + ph - cornerLen); ctx.lineTo(px, py + ph); ctx.lineTo(px + cornerLen, py + ph);
+      // Bottom right
+      ctx.moveTo(px + pw - cornerLen, py + ph); ctx.lineTo(px + pw, py + ph); ctx.lineTo(px + pw, py + ph - cornerLen);
+      ctx.stroke();
+
+      // Label Tag
+      const idTag = (d.track_id !== null && d.track_id !== undefined) ? ` #${d.track_id}` : "";
+      const text = `${d.label.toUpperCase()}${idTag} ${(d.confidence * 100).toFixed(0)}%`;
+      ctx.font = "bold 10px 'JetBrains Mono', monospace";
+      const tw = ctx.measureText(text).width;
+      const tagH = 18;
+      const tagY = Math.max(0, py - tagH);
+
+      ctx.fillStyle = color;
+      ctx.fillRect(px, tagY, tw + 12, tagH);
+      ctx.fillStyle = "#030508";
+      ctx.fillText(text, px + 6, tagY + 13);
+    });
+
+    hudTracked.textContent = trackedCount;
+  }
+
+  function processRisingEdges(detections, prevActive, videoEl, onNew, timestampSec = null){
+    const current = new Set(
+      detections.filter((d) => watchlist.has(d.label)).map((d) => d.label)
+    );
+    current.forEach((label) => {
+      if (!prevActive.has(label)) {
+        const d = detections.find((x) => x.label === label);
+        onNew(label, d ? d.confidence : 0, videoEl, timestampSec, d ? d.track_id : null);
+      }
+    });
+    return current;
+  }
+
+  // ---------- Mode Switching ----------
+  function switchMode(next){
+    if (mode === next) return;
+    if (mode === "live") stopCamera();
+    mode = next;
+    tabLive.classList.toggle("active", mode === "live");
+    tabUpload.classList.toggle("active", mode === "upload");
+    liveControls.style.display = mode === "live" ? "flex" : "none";
+    uploadControls.style.display = mode === "upload" ? "flex" : "none";
+    liveVideo.style.display = "none";
+    liveOverlay.style.display = "none";
+    uploadVideo.style.display = "none";
+    uploadOverlay.style.display = "none";
+    stageEmpty.style.display = "flex";
+    statMode.textContent = "Idle";
+    statModeSecondary.textContent = "Idle";
+    setLiveMode(false);
+    updateThreatScore([]);
+    updateActiveTracksUI([]);
+    updateHUDDimensions(0, 0);
+  }
+  tabLive.addEventListener("click", () => switchMode("live"));
+  tabUpload.addEventListener("click", () => switchMode("upload"));
+
+  // ---------- Live Camera ----------
+  async function startCamera(){
+    try{
+      liveStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+    } catch (err){
+      alert("Could not access camera: " + err.message);
+      return;
+    }
+    liveVideo.srcObject = liveStream;
+    liveVideo.style.display = "block";
+    liveOverlay.style.display = "block";
+    stageEmpty.style.display = "none";
+    startBtn.style.display = "none";
+    stopBtn.style.display = "inline-flex";
+    setLiveMode(true);
+    statMode.textContent = "Live Camera";
+    statModeSecondary.textContent = "Live Camera";
+
+    liveVideo.onloadedmetadata = () => {
+      updateHUDDimensions(liveVideo.videoWidth, liveVideo.videoHeight);
+    };
+
+    sessionStart = Date.now();
+    startElapsedTimer(() => (Date.now() - sessionStart) / 1000);
+
+    liveWS = new WebSocket(WS_URL);
+    liveWS.onopen = () => {
+      liveCaptureTimer = setInterval(captureAndSend, CAPTURE_INTERVAL_MS);
+    };
+    liveWS.onmessage = (evt) => {
+      const data = JSON.parse(evt.data);
+      if (data.error) return;
+      const latency = Date.now() - lastSendTime;
+      latencyText.textContent = `INFERENCE: ${latency}ms`;
+      drawDetections(liveOverlay, liveVideo, data.detections);
+      statObjects.textContent = data.detections.length;
+      pushActivity(data.detections.length);
+      livePrevActive = processRisingEdges(data.detections, livePrevActive, liveVideo, pushAlert);
+    };
+  }
+
+  function captureAndSend(){
+    if (!liveWS || liveWS.readyState !== WebSocket.OPEN) return;
+    const vw = liveVideo.videoWidth, vh = liveVideo.videoHeight;
+    if (!vw || !vh) return;
+    const scale = CAPTURE_WIDTH / vw;
+    captureCanvas.width = CAPTURE_WIDTH;
+    captureCanvas.height = Math.round(vh * scale);
+    const ctx = captureCanvas.getContext("2d");
+    ctx.drawImage(liveVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+    const dataUrl = captureCanvas.toDataURL("image/jpeg", 0.65);
+    lastSendTime = Date.now();
+    liveWS.send(JSON.stringify({ frame: dataUrl }));
+  }
+
+  function stopCamera(){
+    clearInterval(liveCaptureTimer);
+    clearInterval(elapsedTimer);
+    if (liveWS) { liveWS.onclose = null; liveWS.close(); liveWS = null; }
+    if (liveStream) { liveStream.getTracks().forEach((t) => t.stop()); liveStream = null; }
+    liveVideo.srcObject = null;
+    startBtn.style.display = "inline-flex";
+    stopBtn.style.display = "none";
+    setLiveMode(false);
+    livePrevActive = new Set();
+  }
+  startBtn.addEventListener("click", startCamera);
+  stopBtn.addEventListener("click", () => {
+    stopCamera();
+    switchMode("live");
+    stageEmpty.style.display = "flex";
+    liveVideo.style.display = "none";
+    liveOverlay.style.display = "none";
+    statMode.textContent = "Idle";
+    statModeSecondary.textContent = "Idle";
+  });
+
+  // ---------- Upload & Playback ----------
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    uploadStatus.textContent = `Analyzing ${file.name} with YOLOv8 & BoT-SORT tracking…`;
+    fileInput.disabled = true;
+
+    const form = new FormData();
+    form.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Upload failed (" + res.status + ")");
+      const data = await res.json();
+
+      uploadTimeline = data.timeline || [];
+      uploadPrevActive = new Set();
+      trackTrails.clear();
+      activeTracksMap.clear();
+      lastActivityEntryTime = null;
+
+      uploadVideo.src = data.video_url;
+      uploadVideo.style.display = "block";
+      uploadOverlay.style.display = "block";
+      stageEmpty.style.display = "none";
+      uploadStatus.textContent = `${file.name} · ${data.timeline.length} frames (${data.duration}s)`;
+      statMode.textContent = "Playback";
+      statModeSecondary.textContent = "Playback";
+      setLiveMode(true);
+
+      uploadVideo.onloadedmetadata = () => {
+        updateHUDDimensions(uploadVideo.videoWidth, uploadVideo.videoHeight);
+        const entry = nearestTimelineEntry(0);
+        drawDetections(uploadOverlay, uploadVideo, entry ? entry.detections : []);
+      };
+
+      startElapsedTimer(() => uploadVideo.currentTime || 0);
+    } catch (err) {
+      uploadStatus.textContent = "Error analyzing video: " + err.message;
+    } finally {
+      fileInput.disabled = false;
+    }
+  });
+
+  function nearestTimelineEntry(t){
+    if (!uploadTimeline || !uploadTimeline.length) return null;
+    let best = uploadTimeline[0];
+    let minDiff = Math.abs(uploadTimeline[0].time - t);
+    for (let i = 1; i < uploadTimeline.length; i++){
+      const diff = Math.abs(uploadTimeline[i].time - t);
+      if (diff < minDiff){
+        minDiff = diff;
+        best = uploadTimeline[i];
+      }
+    }
+    return minDiff <= 0.75 ? best : null;
+  }
+
+  function updateVideoDetections(){
+    const curTime = uploadVideo.currentTime || 0;
+    const entry = nearestTimelineEntry(curTime);
+    const detections = entry ? entry.detections : [];
+    drawDetections(uploadOverlay, uploadVideo, detections);
+    statObjects.textContent = detections.length;
+    uploadPrevActive = processRisingEdges(detections, uploadPrevActive, uploadVideo, pushAlert, curTime);
+    if (entry && entry.time !== lastActivityEntryTime){
+      lastActivityEntryTime = entry.time;
+      pushActivity(detections.length);
+    }
+  }
+
+  uploadVideo.addEventListener("timeupdate", updateVideoDetections);
+  uploadVideo.addEventListener("seeked", () => {
+    trackTrails.clear();
+    updateVideoDetections();
+  });
+
+  const resizeObserver = new ResizeObserver(() => {
+    drawActivityChart();
+    if (mode === "live" && liveVideo.videoWidth){
+      drawDetections(liveOverlay, liveVideo, []);
+    }
+    if (mode === "upload" && uploadVideo.videoWidth){
+      updateVideoDetections();
+    }
+  });
+  resizeObserver.observe(stage);
+
+  // ---------- AI Intelligence Logic ----------
+  function initAI() {
+    fetch("/api/ai/status")
+      .then(res => res.json())
+      .then(data => {
+        if (data.configured) {
+          aiStatusBadge.className = "ai-status-tag";
+          aiStatusBadge.innerHTML = `● NEMOTRON ONLINE`;
+          indNemotron.className = "ind-pill on";
+        } else {
+          aiStatusBadge.className = "ai-status-tag";
+          aiStatusBadge.innerHTML = `● NEMOTRON STANDBY`;
+        }
+      }).catch(err => {
+        aiStatusBadge.className = "ai-status-tag";
+        aiStatusBadge.innerHTML = `● NEMOTRON OFFLINE`;
+      });
+  }
+  initAI();
+
+  async function analyzeEvent(label, confidence, timestampSec, severity, trackId = null) {
+    aiStatusBadge.className = "ai-status-tag loading";
+    aiStatusBadge.innerHTML = `◌ ANALYZING EVENT...`;
+    
+    // Find telemetry for track
+    const activeTrack = trackId !== null ? activeTracksMap.get(trackId) : null;
+    const movement_level = activeTrack ? activeTrack.movement_level : "MODERATE";
+    const velocity = activeTrack ? activeTrack.velocity : 0.0;
+
+    try {
+      const res = await fetch("/api/ai/analyze-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event_type: "security_detection",
+          target_class: label,
+          track_id: trackId,
+          confidence: confidence,
+          movement_level: movement_level,
+          velocity: velocity,
+          dwell_time_seconds: 12.5,
+          threat_score: lastThreatScore,
+          severity: severity.toUpperCase(),
+          timestamp: new Date().toLocaleTimeString("en-GB"),
+          location: "Monitored Sector"
+        })
+      });
+      const data = await res.json();
+      aiLead.textContent = data.assessment;
+      aiReason.textContent = data.reason;
+      aiActionText.textContent = data.recommended_action;
+      aiActionBox.style.display = "block";
+      
+      const badgeClass = data.severity === "CRITICAL" ? "critical" : data.severity === "HIGH" ? "critical" : "";
+      aiStatusBadge.className = `ai-status-tag ${badgeClass}`;
+      aiStatusBadge.innerHTML = `● ${data.severity}`;
+    } catch(e) {
+      console.error(e);
+      aiStatusBadge.className = "ai-status-tag";
+      aiStatusBadge.innerHTML = `● NEMOTRON ONLINE`;
+    }
+  }
+
+  async function explainThreat(score, level) {
+    if (score === lastThreatScore && level === currentThreatLevel) return;
+    lastThreatScore = score;
+    currentThreatLevel = level;
+    
+    if (level === "NOMINAL" && score === 0) {
+      aiLead.textContent = "Threat status nominal.";
+      aiReason.textContent = "No security threats or watchlisted anomalies detected.";
+      aiActionText.textContent = "Maintain standard surveillance observation.";
+      aiStatusBadge.className = "ai-status-tag";
+      aiStatusBadge.innerHTML = `● NEMOTRON ONLINE`;
+      return;
+    }
+    
+    aiLead.textContent = `Threat Index elevated to ${score}/100 [${level}]`;
+    try {
+      const res = await fetch("/api/ai/explain-threat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          threat_score: score,
+          threat_level: level,
+          active_classes: Array.from(watchlist),
+          total_objects: captures.length,
+          has_critical: level === "CRITICAL",
+          movement_level: "MODERATE"
+        })
+      });
+      const data = await res.json();
+      aiReason.textContent = data.explanation;
+    } catch(e) { console.error(e); }
+  }
+
+  // ---------- Copilot Logic ----------
+  openCopilotBtn.addEventListener("click", () => {
+    copilotModal.style.display = "flex";
+    copilotInput.focus();
+  });
+  closeCopilotBtn.addEventListener("click", () => copilotModal.style.display = "none");
+  
+  function addCopilotMsg(text, isUser) {
+    const d = document.createElement("div");
+    d.className = `copilot-msg ${isUser ? "user" : "assistant"}`;
+    if (!isUser) {
+      d.innerHTML = `<span class="tag">ARGUS COPILOT</span>${text}`;
+    } else {
+      d.textContent = text;
+    }
+    copilotMessages.appendChild(d);
+    copilotMessages.scrollTop = copilotMessages.scrollHeight;
+  }
+
+  async function sendCopilotMsg(text) {
+    const query = text ? text.trim() : "";
+    if (!query || copilotSendBtn.disabled) return;
+    
+    addCopilotMsg(query, true);
+    copilotInput.value = "";
+    copilotInput.disabled = true;
+    copilotSendBtn.disabled = true;
+
+    // Show temporary loading indicator
+    const loadingEl = document.createElement("div");
+    loadingEl.className = "copilot-msg assistant";
+    loadingEl.id = "copilotLoadingMsg";
+    loadingEl.innerHTML = `<span class="tag">ARGUS COPILOT</span><span style="color:var(--text-dim); font-style:italic;">Nemotron-3.5-Lightning is reasoning over telemetry...</span>`;
+    copilotMessages.appendChild(loadingEl);
+    copilotMessages.scrollTop = copilotMessages.scrollHeight;
+
+    const activeTracksPayload = Array.from(activeTracksMap.values());
+    
+    try {
+      const res = await fetch("/api/ai/copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: query,
+          session_context: {
+            elapsed: statElapsed.textContent,
+            objects: statObjects.textContent,
+            alerts: alertCount,
+            threat_score: lastThreatScore,
+            threat_level: currentThreatLevel,
+            classes: classCounts,
+            active_tracks: activeTracksPayload,
+            recent_alerts: captures.slice(0, 8)
+          }
+        })
+      });
+
+      if (loadingEl.parentNode) loadingEl.remove();
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.answer) {
+          addCopilotMsg(data.answer, false);
+        } else {
+          addCopilotMsg("Nemotron returned an empty response.", false);
+        }
+      } else {
+        const errText = await res.text();
+        addCopilotMsg(`[SYSTEM ERROR ${res.status}]: Unable to reach Nemotron endpoint. ${errText.slice(0, 120)}`, false);
+      }
+    } catch(e) {
+      if (loadingEl.parentNode) loadingEl.remove();
+      addCopilotMsg(`[NETWORK ERROR]: Failed to communicate with backend service. (${e.message})`, false);
+    } finally {
+      copilotInput.disabled = false;
+      copilotSendBtn.disabled = false;
+      copilotInput.focus();
+    }
+  }
+  
+  copilotSendBtn.addEventListener("click", () => sendCopilotMsg(copilotInput.value));
+  copilotInput.addEventListener("keypress", (e) => { if(e.key === "Enter") sendCopilotMsg(copilotInput.value); });
+  copilotPromptBtns.forEach(btn => {
+    btn.addEventListener("click", () => sendCopilotMsg(btn.textContent));
+  });
+
+  // ---------- Export Report Generator ----------
+  async function generateReportHTML(){
+    let chartImg = "";
+    try { chartImg = activityChart.toDataURL("image/png"); } catch (e) { /* ignore */ }
+
+    let aiSummaryHTML = "";
+    try {
+      const res = await fetch("/api/ai/session-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          duration: 0,
+          total_alerts: alertCount,
+          total_tracked: parseInt(statObjects.textContent) || 0,
+          highest_threat: lastThreatScore || 0,
+          detected_classes: classCounts,
+          key_events: captures.slice(0, 10)
+        })
+      });
+      const data = await res.json();
+      aiSummaryHTML = `
+        <h2 style="color:#00F0B5; border-bottom:1px solid #1A2433; padding-bottom:4px; margin-top:24px;">ARGUS INTELLIGENCE BRIEFING</h2>
+        <div style="background:#0B0F16; border:1px solid #1A2433; padding: 16px; border-radius: 6px; margin-top: 10px; color: #E4ECF5;">
+          <p style="margin-top:0; font-weight:600; font-size:14px; color: #00F0B5;">${data.overall_assessment}</p>
+          <ul style="margin: 12px 0; padding-left: 20px; font-size: 13px;">
+            ${(data.key_observations || []).map(obs => `<li style="margin-bottom: 6px;">${obs}</li>`).join('')}
+          </ul>
+          <p style="margin-bottom:0; font-size: 12px; color: #FF3D3D;"><strong>HIGHEST RISK EVENT:</strong> ${data.highest_risk_event}</p>
+        </div>
+      `;
+    } catch(e) { console.error("AI Briefing Error:", e); }
+
+    const classRows = Object.entries(classCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => `<tr><td>${label.toUpperCase()}</td><td>${count}</td></tr>`)
+      .join("");
+
+    const alertRows = captures.map((c) => `
+      <tr>
+        <td>${c.time}</td>
+        <td><strong>${c.label.toUpperCase()}${c.trackId ? ` (#${c.trackId})` : ''}</strong></td>
+        <td>${(c.confidence * 100).toFixed(0)}%</td>
+        <td>${c.thumb ? `<img src="${c.thumb}" width="90" />` : "—"}</td>
+      </tr>
+    `).join("");
+
+    return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>ARGUS Intelligence Briefing Report</title>
+<style>
+  body{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color:#111; padding:36px; max-width:860px; margin:0 auto; }
+  h1{ font-size:22px; margin-bottom:4px; letter-spacing:1px; }
+  .meta{ color:#666; font-size:12px; font-family: monospace; margin-bottom:24px; }
+  h2{ font-size:12px; text-transform:uppercase; letter-spacing:1.5px; color:#333; border-bottom:1px solid #ddd; padding-bottom:6px; margin-top:24px; }
+  table{ width:100%; border-collapse:collapse; font-size:12px; margin-top:10px; }
+  td, th{ text-align:left; padding:8px 10px; border-bottom:1px solid #eee; vertical-align:middle; }
+  th{ background: #f8f9fa; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  img{ border-radius:3px; display:block; border: 1px solid #ddd; }
+  .stats{ display:flex; gap:32px; margin-top:10px; }
+  .stat .num{ font-size:24px; font-weight:700; color:#111; font-family: monospace; }
+  .stat .lbl{ font-size:10px; color:#777; text-transform:uppercase; letter-spacing:.8px; margin-top: 2px; }
+  .footer-note{ margin-top:32px; font-size:11px; color:#888; border-top: 1px solid #eee; padding-top: 12px; }
+  @media print{ body{ padding:16px; } tr{ page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+  <h1>ARGUS — Surveillance Intelligence Briefing</h1>
+  <div class="meta">SYSTEM DOSSIER · GENERATED ${new Date().toLocaleString()} · NEMOTRON-3.5-LIGHTNING</div>
+
+  <div class="stats">
+    <div class="stat"><div class="num">${statElapsed.textContent}</div><div class="lbl">Elapsed Surveillance</div></div>
+    <div class="stat"><div class="num">${alertCount}</div><div class="lbl">Security Alerts Triggered</div></div>
+    <div class="stat"><div class="num">${captures.length}</div><div class="lbl">Evidence Captures</div></div>
+  </div>
+
+  ${aiSummaryHTML}
+
+  ${chartImg ? `<h2>Activity Density Profile</h2><img src="${chartImg}" style="width:100%; max-width:680px; background:#06090D; padding:10px; border-radius:4px; margin-top:8px;" />` : ""}
+
+  <h2>Target Class Breakdown</h2>
+  <table>
+    <tr><th>Object Classification</th><th>Detection Count</th></tr>
+    ${classRows || '<tr><td colspan="2">No target classifications registered.</td></tr>'}
+  </table>
+
+  <h2>Security Timeline & Spatial Evidence</h2>
+  <table>
+    <tr><th>Time</th><th>Classification</th><th>Confidence</th><th>Spatial Snapshot</th></tr>
+    ${alertRows || '<tr><td colspan="4">No security events triggered.</td></tr>'}
+  </table>
+
+  <p class="footer-note">ARGUS AI Surveillance Command Center · Nemotron 3.5 Lightning Intelligence Layer</p>
+</body></html>`;
+  }
+
+  async function exportReport(){
+    const exportBtn = $("exportBtn");
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = "Generating...";
+    exportBtn.disabled = true;
+    
+    try {
+      const html = await generateReportHTML();
+      const win = window.open("", "_blank");
+      if (!win){ alert("Please allow popups to export the ARGUS surveillance report."); return; }
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+    } catch(e) {
+      console.error(e);
+      alert("Error generating report.");
+    } finally {
+      exportBtn.innerHTML = originalText;
+      exportBtn.disabled = false;
+    }
+  }
+  $("exportBtn").addEventListener("click", exportReport);
+})();
+</script>
+</body>
+</html>

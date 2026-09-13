@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Model weights (large binary)
+*.pt
+*.onnx
+*.engine
+
+# Uploaded videos (generated at runtime)
+uploads/*.mp4
+uploads/*.mov
+uploads/*.avi
+uploads/*.mkv
+uploads/*.webm
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
