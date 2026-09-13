@@ -253,7 +253,7 @@
   }
   .panel h2 .sub{ font-size:10px; color: var(--text-dimmer); font-weight: normal; }
 
-  /* ---------- AI INTELLIGENCE PANEL (NEMOTRON HERO) ---------- */
+  /* ---------- AI INTELLIGENCE PANEL (GROQ HERO) ---------- */
   .ai-hero-panel{
     background: linear-gradient(180deg, rgba(16, 22, 34, 0.98) 0%, rgba(10, 14, 22, 0.98) 100%);
     border-bottom: 1px solid var(--border-bright);
@@ -521,6 +521,78 @@
     .sidebar{ width:100%; border-left:none; border-top:1px solid var(--border); max-height: none; }
     .copilot-modal{ width: calc(100% - 32px); height: 440px; }
   }
+
+  /* ---------- ENTITY CATEGORY BADGES ---------- */
+  .entity-badge{
+    font-family: var(--mono); font-size: 8px; font-weight: 700;
+    padding: 1px 5px; border-radius: 2px; letter-spacing: 0.5px;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .entity-badge.human{ background: rgba(0,240,181,0.15); color: var(--accent); border: 1px solid var(--accent-dim); }
+  .entity-badge.animal{ background: rgba(255,179,0,0.12); color: var(--warn); border: 1px solid var(--warn-dim); }
+  .entity-badge.vehicle{ background: rgba(0,180,216,0.12); color: var(--info); border: 1px solid rgba(0,180,216,0.3); }
+  .entity-badge.object{ background: var(--panel-alt); color: var(--text-dimmer); border: 1px solid var(--border); }
+
+  /* ---------- MOVEMENT PATTERN TAGS ---------- */
+  .movement-tag{
+    font-family: var(--mono); font-size: 9px; padding: 1px 5px; border-radius: 2px;
+    letter-spacing: 0.4px; font-weight: 600;
+  }
+  .movement-tag.walking{ color: var(--accent); background: rgba(0,240,181,0.08); border: 1px solid var(--accent-dim); }
+  .movement-tag.fast{ color: var(--warn); background: rgba(255,179,0,0.1); border: 1px solid var(--warn-dim); }
+  .movement-tag.cycling{ color: #38bdf8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35); }
+  .movement-tag.group{ color: var(--alert); background: rgba(255,61,61,0.1); border: 1px solid var(--alert-dim); }
+  .movement-tag.lowprofile{ color: #FF8C00; background: rgba(255,140,0,0.1); border: 1px solid rgba(255,140,0,0.3); }
+  .movement-tag.stationary{ color: var(--text-dimmer); background: transparent; border: 1px solid var(--border); }
+  .movement-tag.other{ color: var(--text-dim); background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
+
+  /* ---------- DETECTION PIPELINE BANNER ---------- */
+  .pipeline-banner{
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.6px;
+    background: rgba(11,15,22,0.95); border: 1px solid var(--border);
+    border-radius: 4px; padding: 5px 12px; margin-bottom: 8px; flex-wrap: nowrap;
+    overflow-x: auto; flex-shrink: 0;
+  }
+  .pipeline-banner::-webkit-scrollbar{ height: 2px; }
+  .pipeline-step{
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    padding: 0 10px; text-align: center; white-space: nowrap;
+  }
+  .pipeline-step .ps-label{ color: var(--accent); font-weight: 700; font-size: 9px; }
+  .pipeline-step .ps-sub{ color: var(--text-dimmer); font-size: 8px; }
+  .pipeline-arrow{ color: var(--border-bright); font-size: 12px; padding: 0 2px; flex-shrink: 0; }
+
+  /* ---------- SENSOR CONTEXT ACCORDION ---------- */
+  .sensor-context-panel{ border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .sensor-context-header{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; cursor: pointer; user-select: none;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
+    color: var(--text-dimmer); text-transform: uppercase; transition: color .15s ease;
+  }
+  .sensor-context-header:hover{ color: var(--text); }
+  .sensor-context-header .sc-caret{ font-size: 10px; transition: transform .2s ease; color: var(--text-dimmer); }
+  .sensor-context-header .sc-caret.open{ transform: rotate(90deg); }
+  .sensor-context-body{ padding: 0 16px 12px; display: none; font-size: 10px; color: var(--text-dim); line-height: 1.55; }
+  .sensor-context-body.open{ display: block; }
+  .sc-row{ display: flex; align-items: flex-start; gap: 6px; margin-bottom: 5px; }
+  .sc-icon{ color: var(--warn); flex-shrink: 0; font-size: 10px; margin-top: 1px; }
+  .sc-text{ flex: 1; }
+  .sc-disclaimer{
+    margin-top: 8px; padding: 6px 8px; border-radius: 3px;
+    background: rgba(255,179,0,0.05); border-left: 2px solid var(--warn-dim);
+    font-size: 9px; color: var(--text-dimmer); font-family: var(--mono); line-height: 1.6;
+  }
+
+  /* ---------- ALERT LOG DETAIL GRID ---------- */
+  .log-detail-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin-top: 4px; }
+  .log-detail-cell{ font-family: var(--mono); font-size: 9px; color: var(--text-dimmer); display: flex; gap: 3px; align-items: center; }
+  .log-detail-cell .ldc-key{ color: var(--text-dimmer); }
+  .log-detail-cell .ldc-val{ color: var(--text); font-weight: 600; }
+  .log-detail-cell .ldc-val.accent{ color: var(--accent); }
+  .log-detail-cell .ldc-val.alert{ color: var(--alert); }
+  .log-detail-cell .ldc-val.warn{ color: var(--warn); }
 </style>
 </head>
 <body>
@@ -543,7 +615,7 @@
       <div class="ind-pill on" id="indSystem"><span class="dot"></span>SYSTEM ONLINE</div>
       <div class="ind-pill on" id="indVision"><span class="dot"></span>VISION ONLINE</div>
       <div class="ind-pill on" id="indTracking"><span class="dot"></span>TRACKING ONLINE</div>
-      <div class="ind-pill on" id="indNemotron"><span class="dot"></span>NEMOTRON ONLINE</div>
+      <div class="ind-pill on" id="indGroq"><span class="dot"></span>GROQ ONLINE</div>
     </div>
 
     <div class="topbar-right">
@@ -582,7 +654,8 @@
 
         <div class="stage-hud-meta" id="stageHudMeta" style="display:none;">
           <div class="hud-badge live-rec" id="recBadge"><span class="rec-dot"></span> FEED ACTIVE</div>
-          <div class="hud-badge" id="sourceMetaBadge">YOLOv8 + BoT-SORT</div>
+          <div class="hud-badge" id="sourceMetaBadge">YOLOv8n + BoT-SORT</div>
+          <div class="hud-badge" style="border-color:rgba(0,180,216,0.4); color:var(--info);">&#x1F6F0; SIMULATED DRONE INPUT</div>
         </div>
 
         <div class="stage-inner-wrap" id="stageInnerWrap">
@@ -605,8 +678,26 @@
             <line x1="18" y1="12" x2="22" y2="12"/>
           </svg>
           <div class="big">NO SURVEILLANCE FEED</div>
-          <div>Upload a video or start camera to begin analysis.</div>
+          <div>Upload recorded footage or start camera to begin analysis.</div>
+          <div style="font-size:10px; color:var(--text-dimmer); margin-top:6px; font-family:var(--mono); max-width:340px; line-height:1.5;">
+            &#x1F6F0; Footage is processed as <strong style="color:var(--info);">simulated drone-camera input</strong>.<br>
+            Live border/drone feeds are not available for this demonstration.<br>
+            Human operator remains in the loop for all decisions.
+          </div>
         </div>
+      </div>
+
+      <!-- DETECTION PIPELINE BANNER -->
+      <div class="pipeline-banner" title="ARGUS CV Pipeline: YOLOv8n → BoT-SORT → Heuristic → Deterministic → Event Log">
+        <div class="pipeline-step"><span class="ps-label">DETECTION</span><span class="ps-sub">YOLOv8n</span></div>
+        <span class="pipeline-arrow">&#x2192;</span>
+        <div class="pipeline-step"><span class="ps-label">TRACK ID</span><span class="ps-sub">BoT-SORT</span></div>
+        <span class="pipeline-arrow">&#x2192;</span>
+        <div class="pipeline-step"><span class="ps-label">MOVEMENT PATTERN</span><span class="ps-sub">Heuristic Classifier</span></div>
+        <span class="pipeline-arrow">&#x2192;</span>
+        <div class="pipeline-step"><span class="ps-label">THREAT SCORE</span><span class="ps-sub">Deterministic Engine</span></div>
+        <span class="pipeline-arrow">&#x2192;</span>
+        <div class="pipeline-step"><span class="ps-label">ALERT / EVENT</span><span class="ps-sub">Groq (NL Layer)</span></div>
       </div>
 
       <div class="stage-controls" id="liveControls">
@@ -632,7 +723,7 @@
     <!-- SIDEBAR PANELS -->
     <aside class="sidebar">
       
-      <!-- 2. NEMOTRON AI INTELLIGENCE HERO PANEL -->
+      <!-- 2. GROQ AI INTELLIGENCE HERO PANEL -->
       <div class="ai-hero-panel" id="aiPanel">
         <div class="ai-hero-header">
           <div class="ai-hero-title">
@@ -640,9 +731,10 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
               AI INTELLIGENCE
             </div>
-            <div class="ai-hero-sub-title">Powered by NEMOTRON-3.5-LIGHTNING</div>
+            <div class="ai-hero-sub-title" id="aiHeroSubtitle">Powered by Groq — GPT-OSS 20B</div>
+            <div class="ai-hero-sub-title" style="color:var(--text-dimmer); margin-top:1px;">NL Explanation Layer &mdash; CV pipeline owns detection &amp; scoring</div>
           </div>
-          <div class="ai-status-tag" id="aiStatusBadge">● NEMOTRON ONLINE</div>
+          <div class="ai-status-tag" id="aiStatusBadge">● GROQ ONLINE</div>
         </div>
         
         <div class="ai-card" id="aiCard">
@@ -675,7 +767,7 @@
           <div class="threat-bar-track">
             <div class="threat-bar-fill" id="threatBarFill"></div>
           </div>
-          <div style="font-size:9px; color:var(--text-dimmer); margin-top:5px; font-family:var(--mono);">Calculated by ARGUS Threat Engine · Interpreted by Nemotron</div>
+          <div style="font-size:9px; color:var(--text-dimmer); margin-top:5px; font-family:var(--mono);">Calculated by ARGUS Threat Engine · Interpreted by Groq</div>
         </div>
 
         <div class="stat-grid">
@@ -725,6 +817,23 @@
         <canvas class="activity-chart" id="activityChart"></canvas>
       </div>
 
+      <!-- THERMAL / LOW-LIGHT SENSOR CONTEXT PANEL (P4) -->
+      <div class="sensor-context-panel">
+        <div class="sensor-context-header" id="sensorContextHeader">
+          <span>&#x26A0; Sensor Context &amp; Limitations</span>
+          <span class="sc-caret" id="sensorContextCaret">&#x25B6;</span>
+        </div>
+        <div class="sensor-context-body" id="sensorContextBody">
+          <p style="margin-bottom:8px; color:var(--text-dim);">ARGUS is designed to operate on <strong>thermal/low-light and optical footage</strong> simulating drone-camera imagery at border zones. The following challenges are inherent:</p>
+          <div class="sc-row"><span class="sc-icon">&#x25CF;</span><span class="sc-text"><strong>Low-resolution thermal imagery</strong> — reduced spatial detail compared to RGB sensors.</span></div>
+          <div class="sc-row"><span class="sc-icon">&#x25CF;</span><span class="sc-text"><strong>Thermal blooming</strong> — heat sources bleed into adjacent pixels, blurring object boundaries.</span></div>
+          <div class="sc-row"><span class="sc-icon">&#x25CF;</span><span class="sc-text"><strong>Absence of RGB color/texture</strong> — limits fine-grained object discrimination.</span></div>
+          <div class="sc-row"><span class="sc-icon">&#x25CF;</span><span class="sc-text"><strong>Partial occlusion</strong> — subjects may be obscured by terrain, vegetation, or other objects.</span></div>
+          <div class="sc-row"><span class="sc-icon">&#x25CF;</span><span class="sc-text"><strong>Temporal ambiguity</strong> — rapid frame changes can cause identity-switching between tracks.</span></div>
+          <div class="sc-disclaimer">HONEST NOTE: Persistent tracking (BoT-SORT) and multi-frame trajectory analysis provide additional context across frames, but do NOT completely solve these challenges. Movement-pattern classification is a prototype heuristic, not a trained pose model. Human operator review is essential.</div>
+        </div>
+      </div>
+
     </aside>
   </main>
 </div>
@@ -745,14 +854,14 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       ARGUS <span>COPILOT</span>
     </div>
-    <div class="copilot-subtitle">Powered by Nemotron-3.5-Lightning</div>
+    <div class="copilot-subtitle" id="copilotSubtitle">Powered by Groq — GPT-OSS 20B</div>
     <button class="copilot-close" id="closeCopilotBtn">✕</button>
   </div>
 
   <div class="copilot-messages" id="copilotMessages">
     <div class="copilot-msg assistant">
       <span class="tag">ARGUS COPILOT</span>
-      Hello. I am ARGUS Copilot powered by Nemotron-3.5-Lightning. Ask me direct questions about current session telemetry, tracking patterns, or security alerts.
+      Hello. I am ARGUS Copilot powered by Groq (GPT-OSS 20B). Ask me direct questions about current session telemetry, tracking patterns, or security alerts.
     </div>
   </div>
 
@@ -780,13 +889,150 @@
     "laptop", "car", "bicycle", "dog", "bottle"
   ];
   const CRITICAL_CLASSES = new Set(["knife"]);
-  const ELEVATED_CLASSES = new Set(["backpack", "suitcase", "person"]);
-  const DEFAULT_ON = new Set(["person", "backpack", "suitcase", "knife", "cell phone"]);
+  const ELEVATED_CLASSES = new Set(["backpack", "suitcase"]);
+  // Cell phone removed from DEFAULT_ON — objects must not generate security alerts by default.
+  const DEFAULT_ON = new Set(["person", "backpack", "suitcase", "knife"]);
+  // Only these labels may generate security alerts and contribute to threat score.
+  const SECURITY_ALERT_LABELS = new Set(["person", "knife", "backpack", "suitcase"]);
+  const LIVE_ALERT_COOLDOWN_MS = 30000; // 30 s cooldown per (label+track) on live camera
+  // HUMAN vs NON-HUMAN classification using YOLO class names (P2)
+  const HUMAN_CLASSES = new Set(["person"]);
+  const ANIMAL_CLASSES = new Set(["dog","cat","bird","horse","cow","elephant","bear","zebra","giraffe","sheep"]);
+  const VEHICLE_CLASSES = new Set(["car","truck","bus","motorcycle","bicycle","airplane","boat","train"]);
   const WS_URL = `ws://${location.host}/ws/live`;
   const CAPTURE_INTERVAL_MS = 600;
   const CAPTURE_WIDTH = 480;
   const ACTIVITY_MAX_POINTS = 40;
   const MAX_CAPTURES = 100;
+
+  // ---------- Entity Category Helper (P2) ----------
+  function getEntityCategory(label) {
+    if (HUMAN_CLASSES.has(label))   return "human";
+    if (ANIMAL_CLASSES.has(label))  return "animal";
+    if (VEHICLE_CLASSES.has(label)) return "vehicle";
+    return "object";
+  }
+
+  // History tracking for breadcrumbs (trackId -> [{x, y, time}])
+  const trackTrails = new Map();
+  // History tracking for bounding-box heights (trackId -> [h1, h2, ...])
+  const trackHeightHistory = new Map();
+  // Map of active tracks for active tracks UI card list
+  const activeTracksMap = new Map();
+
+  // ---------- Surveillance Movement / Activity Classifier ----------
+  // Robust activity classification using YOLO + BoT-SORT tracking:
+  // - STATIONARY
+  // - NORMAL WALKING
+  // - FAST MOVEMENT / RUNNING
+  // - CYCLING (person + bicycle association + sustained movement)
+  // - GROUP MOVEMENT (coherent multi-person movement)
+  // - LOW-PROFILE (HEURISTIC) (clearly labelled prototype geometry heuristic)
+  // - OTHER
+  function getMovementPattern(labelOrDetection, velocity, boxW, boxH, detectionsOrCount, currentDetection) {
+    let d = currentDetection;
+    let label = "unknown";
+    if (typeof labelOrDetection === "object" && labelOrDetection !== null) {
+      d = labelOrDetection;
+      label = d.label || "unknown";
+    } else if (typeof labelOrDetection === "string") {
+      label = labelOrDetection;
+    }
+    const trackId = (d && d.track_id !== undefined && d.track_id !== null) ? d.track_id : null;
+    const box = (d && d.box) ? d.box : null;
+    const allDetections = Array.isArray(detectionsOrCount) ? detectionsOrCount : [];
+
+    if (label !== "person" && label !== "bicycle") {
+      if (velocity < 3.0) return "STATIONARY";
+      if (velocity >= 14.0) return "FAST MOVEMENT / RUNNING";
+      if (velocity >= 3.0) return "MOVING";
+      return "OTHER";
+    }
+
+    // 1. STATIONARY check
+    if (velocity < 3.0) {
+      return "STATIONARY";
+    }
+
+    // 2. CYCLING check:
+    // Person + bicycle association when spatially close/overlapping + movement over consecutive frames
+    if (label === "person" || label === "bicycle") {
+      const bicycles = allDetections.filter(x => x.label === "bicycle");
+      if (bicycles.length > 0 && box && velocity >= 3.5) {
+        const [px1, py1, px2, py2] = box;
+        const pxc = (px1 + px2) / 2, pyc = (py1 + py2) / 2;
+        const isAssociated = bicycles.some(b => {
+          if (!b.box) return false;
+          const [bx1, by1, bx2, by2] = b.box;
+          const bxc = (bx1 + bx2) / 2, byc = (by1 + by2) / 2;
+          const dist = Math.hypot(pxc - bxc, pyc - byc);
+          const overlapX = Math.max(0, Math.min(px2, bx2) - Math.max(px1, bx1));
+          return (dist < 0.28) || (overlapX > 0 && py2 >= by1 - 0.05 && Math.abs(pxc - bxc) < 0.20);
+        });
+        if (isAssociated) {
+          return "CYCLING";
+        }
+      }
+    }
+
+    // 3. LOW-PROFILE (HEURISTIC):
+    // Prototype heuristic based on bounding-box aspect ratio (squat w/h >= 0.85) or relative height drop >= 30%
+    if (label === "person" && boxH > 0 && velocity < 14.0) {
+      const aspect = boxW / boxH;
+      let heightDropped = false;
+      if (trackId !== null && trackHeightHistory.has(trackId)) {
+        const hList = trackHeightHistory.get(trackId);
+        if (hList.length >= 3) {
+          const maxH = Math.max(...hList);
+          if (maxH > 0 && boxH <= 0.70 * maxH) {
+            heightDropped = true;
+          }
+        }
+      }
+      if (aspect >= 0.85 || heightDropped) {
+        return "LOW-PROFILE (HEURISTIC)";
+      }
+    }
+
+    // 4. FAST MOVEMENT / RUNNING
+    if (velocity >= 14.0) {
+      return "FAST MOVEMENT / RUNNING";
+    }
+
+    // 5. GROUP MOVEMENT:
+    // Multiple nearby persistent human Track IDs moving coherently
+    if (label === "person" && box && velocity >= 3.0 && allDetections.length > 1) {
+      const [px1, py1, px2, py2] = box;
+      const pxc = (px1 + px2) / 2, pyc = (py1 + py2) / 2;
+      const nearbyMovingPersons = allDetections.filter(other => {
+        if (other.label !== "person") return false;
+        if (trackId !== null && other.track_id === trackId) return false;
+        if (!other.box) return false;
+        const [ox1, oy1, ox2, oy2] = other.box;
+        const oxc = (ox1 + ox2) / 2, oyc = (oy1 + oy2) / 2;
+        const dist = Math.hypot(pxc - oxc, pyc - oyc);
+        let otherVel = other.velocity || 0;
+        if (other.track_id !== null && other.track_id !== undefined && trackTrails.has(other.track_id)) {
+          const ot = trackTrails.get(other.track_id);
+          if (ot.length >= 2) {
+            const p1 = ot[ot.length - 1], p2 = ot[ot.length - 2];
+            otherVel = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+          }
+        }
+        return dist < 0.35 && otherVel >= 3.0;
+      });
+      if (nearbyMovingPersons.length >= 1) {
+        return "GROUP MOVEMENT";
+      }
+    }
+
+    // 6. NORMAL WALKING
+    if (label === "person" && velocity >= 3.0 && velocity < 14.0) {
+      return "NORMAL WALKING";
+    }
+
+    return "OTHER";
+  }
 
   // ---------- State ----------
   let mode = "live";
@@ -807,11 +1053,11 @@
   let uploadTimeline = [];
   let uploadPrevActive = new Set();
   let lastActivityEntryTime = null;
-
-  // History tracking for breadcrumbs (trackId -> [{x, y, time}])
-  const trackTrails = new Map();
-  // Map of active tracks for active tracks UI card list
-  const activeTracksMap = new Map();
+  // Alert deduplication: key = "label_trackId" (or "label" if no trackId).
+  // For upload mode: fire once per key per session.
+  // For live mode: fire once per key per LIVE_ALERT_COOLDOWN_MS window.
+  const firedAlertKeys = new Set();
+  const trackAlertTimestamps = new Map(); // key -> Date.now() of last alert
 
   // ---------- DOM References ----------
   const $ = (id) => document.getElementById(id);
@@ -824,7 +1070,7 @@
   const startBtn = $("startBtn"), stopBtn = $("stopBtn");
   const fileInput = $("fileInput"), uploadStatus = $("uploadStatus");
   const latencyText = $("latencyText");
-  const indNemotron = $("indNemotron");
+  const indGroq = $("indGroq");
   const statMode = $("statMode"), statModeSecondary = $("statModeSecondary");
   const statObjects = $("statObjects");
   const statAlerts = $("statAlerts"), statElapsed = $("statElapsed");
@@ -909,7 +1155,17 @@
     }, 500);
   }
 
-  // ---------- Threat Scoring ----------
+  // ---------- Threat Scoring (BUG 2 FIX) ----------
+  // ROOT CAUSE OF BUG: previous formula was 10 + SUM(per_detection_weight), so 6 persons
+  // = 10 + 90 = 100 → CRITICAL. That is an accumulation model, not a current-state model.
+  //
+  // NEW DESIGN: score represents the current threat composition in the frame.
+  // - Only SECURITY_ALERT_LABELS (person, knife, backpack, suitcase) contribute.
+  // - Objects (cell phone, laptop, bottle), animals, vehicles: ZERO contribution.
+  // - Person score uses diminishing returns — capped so normal groups can't reach CRITICAL.
+  // - CRITICAL requires a weapon (knife) or explicit critical detection.
+  // - Repeated detections of the SAME person across frames produce the same score each frame
+  //   (idempotent) — no accumulation across frames.
   function updateThreatScore(detections){
     if (!detections || !detections.length){
       threatBarFill.style.width = "4%";
@@ -920,26 +1176,56 @@
       return;
     }
 
-    let score = 10;
+    let score = 0;
     let hasCritical = false;
     let hasElevated = false;
 
-    detections.forEach((d) => {
-      if (CRITICAL_CLASSES.has(d.label)){
-        score += 45;
-        hasCritical = true;
-      } else if (ELEVATED_CLASSES.has(d.label)){
-        score += 15;
-        hasElevated = true;
-      } else {
-        score += 5;
-      }
-    });
+    // Only score security-relevant classes
+    const weapons   = detections.filter(d => CRITICAL_CLASSES.has(d.label));
+    const persons   = detections.filter(d => d.label === "person");
+    const bags      = detections.filter(d => d.label === "backpack" || d.label === "suitcase");
+    // Everything else (cell phone, laptop, animals, vehicles): zero contribution.
+
+    // 1. Weapons — immediate critical
+    if (weapons.length > 0) {
+      score = 80;
+      hasCritical = true;
+    }
+
+    // 2. Persons — diminishing-return scoring, capped so normal groups stay ELEVATED
+    if (persons.length > 0) {
+      // Base: 20 for first person
+      let personScore = 20;
+      // Each additional person adds 4 pts, capped at +16 (i.e. 5+ people max 36)
+      personScore += Math.min((persons.length - 1) * 4, 16);
+      // Group movement bonus (3+ persons tracked)
+      if (persons.length >= 3) personScore += 8;
+      // Low-profile heuristic bonus — max once, not per-person
+      const hasLowProfile = persons.some(d => {
+        const bw = d.box[2] - d.box[0];
+        const bh = d.box[3] - d.box[1];
+        return bh > 0 && (bw / bh) > 1.35;
+      });
+      if (hasLowProfile) personScore += 8;
+      // Person score is capped at 60: normal people can reach ELEVATED but not CRITICAL
+      personScore = Math.min(personScore, 60);
+      score = Math.max(score, personScore);
+      if (personScore >= 35) hasElevated = true;
+    }
+
+    // 3. Unattended bags — always ELEVATED-level concern
+    if (bags.length > 0) {
+      // 30 + 5 per extra bag, capped at 50
+      const bagScore = Math.min(30 + bags.length * 5, 50);
+      score = Math.max(score, bagScore);
+      hasElevated = true;
+    }
 
     score = Math.min(100, Math.max(0, score));
     threatBarFill.style.width = `${score}%`;
     threatIndexNum.textContent = `INDEX: ${score} / 100`;
 
+    // Determine level — hasCritical (weapon) or score >=65 required for CRITICAL
     if (hasCritical || score >= 65){
       threatBarFill.className = "threat-bar-fill critical";
       threatLevelText.textContent = "CRITICAL";
@@ -959,7 +1245,7 @@
     }
   }
 
-  // ---------- Active Tracks Panel Rendering ----------
+  // ---------- Active Tracks Panel Rendering (P1, P2, P3) ----------
   function updateActiveTracksUI(detections){
     if (!detections || !detections.length){
       activeTracksList.innerHTML = `<div style="font-size:11px; color:var(--text-dimmer); text-align:center; padding:10px 0; font-family:var(--mono);" id="noTracksMsg">NO ACTIVE TRACKS</div>`;
@@ -968,12 +1254,16 @@
       return;
     }
 
+    // Count persons for group movement detection
+    const personCount = detections.filter(d => d.label === "person" && d.track_id !== null).length;
+
     const currentTrackIds = new Set();
     detections.forEach(d => {
       if (d.track_id !== null && d.track_id !== undefined){
         currentTrackIds.add(d.track_id);
         const isCritical = CRITICAL_CLASSES.has(d.label);
         const isElevated = ELEVATED_CLASSES.has(d.label);
+        const category = getEntityCategory(d.label);
         const trail = trackTrails.get(d.track_id) || [];
         let velocity = 0;
         if (trail.length >= 2){
@@ -981,15 +1271,30 @@
           velocity = Math.hypot(p1.x - p2.x, p1.y - p2.y);
         }
         const movement_level = velocity > 15 ? "HIGH" : velocity > 4 ? "MODERATE" : "STATIONARY";
-        const threatScore = isCritical ? 85 : isElevated ? 55 : 20;
+        // Bounding box aspect ratio for low-profile detection
+        const bw = d.box[2] - d.box[0];
+        const bh = d.box[3] - d.box[1];
+        if (!trackHeightHistory.has(d.track_id)) trackHeightHistory.set(d.track_id, []);
+        const hList = trackHeightHistory.get(d.track_id);
+        hList.push(bh);
+        if (hList.length > 20) hList.shift();
+
+        const movementPattern = getMovementPattern(d, velocity, bw, bh, detections);
+        const trackRisk = isCritical ? 85 :
+                          (d.label === "backpack" || d.label === "suitcase") ? 35 :
+                          (d.label === "person") ? (movementPattern.startsWith("LOW-PROFILE") ? 28 : 20) :
+                          (category === "vehicle" ? 15 : category === "animal" ? 10 : 5);
 
         activeTracksMap.set(d.track_id, {
           track_id: d.track_id,
           label: d.label,
           confidence: d.confidence,
           movement_level,
+          movementPattern,
+          category,
           velocity: roundVal(velocity, 1),
-          threat: threatScore
+          risk_contribution: trackRisk,
+          threat: trackRisk
         });
       }
     });
@@ -1010,12 +1315,22 @@
       const card = document.createElement("div");
       card.className = "track-card";
       const threatClass = t.threat >= 70 ? "high" : t.threat >= 40 ? "moderate" : "low";
+      const mpClass = t.movementPattern.startsWith("CYCLING") ? "cycling" :
+                      t.movementPattern.startsWith("GROUP") ? "group" :
+                      t.movementPattern.startsWith("LOW-PROFILE") ? "lowprofile" :
+                      (t.movementPattern.startsWith("FAST") || t.movementPattern.includes("RUNNING")) ? "fast" :
+                      (t.movementPattern === "NORMAL WALKING" || t.movementPattern === "MOVING") ? "walking" :
+                      t.movementPattern === "STATIONARY" ? "stationary" : "other";
       card.innerHTML = `
-        <div>
+        <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
           <span class="track-card-id">#${t.track_id}</span>
           <span class="track-card-label">${t.label}</span>
+          <span class="entity-badge ${t.category}">${t.category}</span>
         </div>
-        <div class="track-card-meta">${t.movement_level}</div>
+        <div style="display:flex; gap:5px; align-items:center; margin-top:3px; flex-wrap:wrap;">
+          <span class="movement-tag ${mpClass}">${t.movementPattern}</span>
+          <span style="font-family:var(--mono); font-size:9px; color:var(--text-dimmer);">${(t.confidence*100).toFixed(0)}% conf</span>
+        </div>
         <div class="track-card-threat ${threatClass}">THREAT ${t.threat}</div>
       `;
       activeTracksList.appendChild(card);
@@ -1079,7 +1394,9 @@
   $("lightboxClose").addEventListener("click", () => lightbox.style.display = "none");
   lightbox.addEventListener("click", (e) => { if (e.target === lightbox) lightbox.style.display = "none"; });
 
-  // ---------- Security Log Timeline ----------
+  // ---------- Security Log Timeline (P3) ----------
+  // Each alert exposes: Track ID, Object Class, Entity Category, Movement Pattern,
+  // Confidence, Threat Score, and Severity — all 6 required fields.
   function pushAlert(label, confidence, videoEl, timestampSec = null, trackId = null){
     alertCount++;
     statAlerts.textContent = alertCount;
@@ -1087,21 +1404,43 @@
 
     const thumb = captureThumbnail(videoEl);
     const timeStr = new Date().toLocaleTimeString("en-GB");
+    // Gather enriched info from active track if available
+    const activeTrack = trackId !== null ? activeTracksMap.get(trackId) : null;
+    const movementPattern = activeTrack ? activeTrack.movementPattern : "—";
+    const category = activeTrack ? activeTrack.category : getEntityCategory(label);
+    const trackThreat = activeTrack ? (activeTrack.risk_contribution || activeTrack.threat) : (CRITICAL_CLASSES.has(label) ? 85 : (label === "backpack" || label === "suitcase") ? 35 : 20);
+    const severity = CRITICAL_CLASSES.has(label) ? "critical" :
+                     (label === "backpack" || label === "suitcase") ? "elevated" :
+                     (movementPattern.startsWith("LOW-PROFILE")) ? "elevated" : "info";
+    const reason = CRITICAL_CLASSES.has(label) ? "Critical weapon detected" :
+                   (label === "backpack" || label === "suitcase") ? "Unattended baggage detected" :
+                   movementPattern.startsWith("LOW-PROFILE") ? "Low-profile / crouching visual geometry heuristic" :
+                   movementPattern.startsWith("CYCLING") ? "Active cycling motion" :
+                   movementPattern.startsWith("FAST") ? "High velocity movement" :
+                   movementPattern === "NORMAL WALKING" ? "Routine pedestrian walking" :
+                   movementPattern === "STATIONARY" ? "Stationary entity in surveillance zone" : "Standard activity";
+
     const entryData = {
-      label, confidence, time: timeStr, timestampSec, trackId, thumb
+      label, confidence, time: timeStr, timestampSec, trackId, thumb,
+      movementPattern, category, trackThreat, severity, reason
     };
     captures.unshift(entryData);
     if (captures.length > MAX_CAPTURES) captures.pop();
 
     if (logEmpty){ logEmpty.remove(); logEmpty = null; }
     logCountBadge.textContent = `${captures.length} EVENTS`;
-
-    const severity = CRITICAL_CLASSES.has(label) ? "critical" : ELEVATED_CLASSES.has(label) ? "elevated" : "info";
     const badgeText = severity.toUpperCase();
+    const mpClass = movementPattern.startsWith("CYCLING") ? "cycling" :
+                    movementPattern.startsWith("GROUP") ? "group" :
+                    movementPattern.startsWith("LOW-PROFILE") ? "lowprofile" :
+                    (movementPattern.startsWith("FAST") || movementPattern.includes("RUNNING")) ? "fast" :
+                    (movementPattern === "NORMAL WALKING" || movementPattern === "MOVING") ? "walking" :
+                    movementPattern === "STATIONARY" ? "stationary" : "other";
 
     const entry = document.createElement("div");
     entry.className = `log-entry ${severity}`;
-    const trackTag = trackId !== null ? ` (#${trackId})` : "";
+    const trackTag = trackId !== null ? ` #${trackId}` : "";
+    const threatValClass = trackThreat >= 70 ? "alert" : trackThreat >= 40 ? "warn" : "accent";
     entry.innerHTML = `
       ${thumb ? `<img class="thumb" src="${thumb}" alt="${label}" />` : ''}
       <div class="body">
@@ -1109,7 +1448,14 @@
           <span class="label">${label}${trackTag} DETECTED</span>
           <span class="badge">${badgeText}</span>
         </div>
-        <div class="meta">${timeStr} · ${(confidence * 100).toFixed(0)}% conf ${timestampSec !== null ? `· @${timestampSec.toFixed(1)}s` : ''}</div>
+        <div class="meta">${timeStr}${timestampSec !== null ? ` · @${timestampSec.toFixed(1)}s` : ''}</div>
+        <div class="log-detail-grid">
+          <div class="log-detail-cell"><span class="ldc-key">TRACK:</span><span class="ldc-val accent">${trackId !== null ? '#'+trackId : '—'}</span></div>
+          <div class="log-detail-cell"><span class="ldc-key">CLASS:</span><span class="ldc-val"><span class="entity-badge ${category}">${category}</span></span></div>
+          <div class="log-detail-cell" style="grid-column:1/-1;"><span class="ldc-key">MOVEMENT:</span><span class="movement-tag ${mpClass}" style="margin-left:3px;">${movementPattern}</span></div>
+          <div class="log-detail-cell"><span class="ldc-key">CONF:</span><span class="ldc-val">${(confidence*100).toFixed(0)}%</span></div>
+          <div class="log-detail-cell"><span class="ldc-key">THREAT:</span><span class="ldc-val ${threatValClass}">${trackThreat}/100</span></div>
+        </div>
       </div>
     `;
 
@@ -1133,6 +1479,76 @@
     if (typeof analyzeEvent === 'function') {
       analyzeEvent(label, confidence, timestampSec, severity, trackId);
     }
+  }
+
+  function renderCaptures() {
+    if (!logList) return;
+    if (logCountBadge) {
+      logCountBadge.textContent = `${(captures || []).length} EVENTS`;
+    }
+    if (!captures || captures.length === 0) {
+      logList.innerHTML = '<div class="log-empty" id="logEmpty">NO ACTIVE SECURITY EVENTS</div>';
+      logEmpty = $("logEmpty");
+      return;
+    }
+    logEmpty = null;
+    logList.innerHTML = "";
+    captures.forEach((c) => {
+      const severity = c.severity || "info";
+      const badgeText = severity.toUpperCase();
+      const mp = c.movementPattern || "OTHER";
+      const mpClass = mp.startsWith("CYCLING") ? "cycling" :
+                      mp.startsWith("GROUP") ? "group" :
+                      mp.startsWith("LOW-PROFILE") ? "lowprofile" :
+                      (mp.startsWith("FAST") || mp.includes("RUNNING")) ? "fast" :
+                      (mp === "NORMAL WALKING" || mp === "MOVING") ? "walking" :
+                      mp === "STATIONARY" ? "stationary" : "other";
+      const trackTag = (c.trackId !== null && c.trackId !== undefined) ? ` #${c.trackId}` : "";
+      const trackThreat = c.trackThreat || 20;
+      const threatValClass = trackThreat >= 70 ? "alert" : trackThreat >= 40 ? "warn" : "accent";
+      const category = c.category || "human";
+      const timeStr = c.time || "--:--:--";
+      const timestampSec = (c.timestampSec !== undefined) ? c.timestampSec : null;
+
+      const entry = document.createElement("div");
+      entry.className = `log-entry ${severity}`;
+      entry.innerHTML = `
+        ${c.thumb ? `<img class="thumb" src="${c.thumb}" alt="${c.label}" />` : ''}
+        <div class="body">
+          <div class="head-line">
+            <span class="label">${c.label}${trackTag} DETECTED</span>
+            <span class="badge">${badgeText}</span>
+          </div>
+          <div class="meta">${timeStr}${timestampSec !== null ? ` · @${timestampSec.toFixed(1)}s` : ''}</div>
+          <div class="log-detail-grid">
+            <div class="log-detail-cell"><span class="ldc-key">TRACK:</span><span class="ldc-val accent">${(c.trackId !== null && c.trackId !== undefined) ? '#'+c.trackId : '—'}</span></div>
+            <div class="log-detail-cell"><span class="ldc-key">CLASS:</span><span class="ldc-val"><span class="entity-badge ${category}">${category}</span></span></div>
+            <div class="log-detail-cell" style="grid-column:1/-1;"><span class="ldc-key">MOVEMENT:</span><span class="movement-tag ${mpClass}" style="margin-left:3px;">${mp}</span></div>
+            <div class="log-detail-cell"><span class="ldc-key">CONF:</span><span class="ldc-val">${((c.confidence || 0)*100).toFixed(0)}%</span></div>
+            <div class="log-detail-cell"><span class="ldc-key">THREAT:</span><span class="ldc-val ${threatValClass}">${trackThreat}/100</span></div>
+          </div>
+        </div>
+      `;
+
+      if (c.thumb) {
+        const thumbEl = entry.querySelector(".thumb");
+        if (thumbEl) {
+          thumbEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openLightbox(c);
+          });
+        }
+      }
+
+      entry.addEventListener("click", () => {
+        if (mode === "upload" && timestampSec !== null && uploadVideo){
+          uploadVideo.currentTime = Math.max(0, timestampSec - 0.5);
+          uploadVideo.play();
+        }
+      });
+
+      logList.appendChild(entry);
+    });
   }
 
   // ---------- Geometry & Box Rendering ----------
@@ -1243,33 +1659,76 @@
       ctx.moveTo(px + pw - cornerLen, py + ph); ctx.lineTo(px + pw, py + ph); ctx.lineTo(px + pw, py + ph - cornerLen);
       ctx.stroke();
 
-      // Label Tag
+      // Label Tag — 2-line: main label + movement pattern (P1, P6)
+      const trail = trackTrails.get(d.track_id);
+      const bw = (x2 - x1) * fit.w;
+      const bh = (y2 - y1) * fit.h;
+      // Person count for group movement
+      const pCount = detections.filter(dx => dx.label === "person" && dx.track_id !== null).length;
+      const vel = (trail && trail.length >= 2)
+        ? Math.hypot(trail[trail.length-1].x - trail[trail.length-2].x, trail[trail.length-1].y - trail[trail.length-2].y)
+        : 0;
+      const movPat = getMovementPattern(d, vel, bw, bh, detections);
+      const cat = getEntityCategory(d.label);
       const idTag = (d.track_id !== null && d.track_id !== undefined) ? ` #${d.track_id}` : "";
-      const text = `${d.label.toUpperCase()}${idTag} ${(d.confidence * 100).toFixed(0)}%`;
+      const line1 = `${d.label.toUpperCase()}${idTag}  ${(d.confidence * 100).toFixed(0)}%  [${cat.toUpperCase()}]`;
+      const line2 = movPat;
       ctx.font = "bold 10px 'JetBrains Mono', monospace";
-      const tw = ctx.measureText(text).width;
-      const tagH = 18;
+      const tw1 = ctx.measureText(line1).width;
+      const tw2 = ctx.measureText(line2).width;
+      const tagW = Math.max(tw1, tw2) + 12;
+      const tagH = 30;
       const tagY = Math.max(0, py - tagH);
 
       ctx.fillStyle = color;
-      ctx.fillRect(px, tagY, tw + 12, tagH);
+      ctx.fillRect(px, tagY, tagW, tagH);
       ctx.fillStyle = "#030508";
-      ctx.fillText(text, px + 6, tagY + 13);
+      ctx.fillText(line1, px + 6, tagY + 12);
+      ctx.font = "9px 'JetBrains Mono', monospace";
+      ctx.fillText(line2, px + 6, tagY + 25);
     });
 
     hudTracked.textContent = trackedCount;
   }
 
+  // ---------- Alert Rising-Edge Detection (BUG 2 FIX) ----------
+  // ROOT CAUSE OF BUG: previous version keyed by label-string only.
+  // "person" disappeared for 1 frame then reappeared => re-fired alert.
+  // In upload mode with 2fps sampling, gaps between frames are common.
+  // This caused 24 alerts from a short clip.
+  //
+  // FIX: key by "label_trackId". Once a (label, trackId) pair has fired an alert
+  // it never fires again for uploaded video. For live camera, a 30s cooldown applies.
+  // Only SECURITY_ALERT_LABELS can produce alerts — objects, animals, vehicles cannot.
   function processRisingEdges(detections, prevActive, videoEl, onNew, timestampSec = null){
-    const current = new Set(
-      detections.filter((d) => watchlist.has(d.label)).map((d) => d.label)
-    );
-    current.forEach((label) => {
-      if (!prevActive.has(label)) {
-        const d = detections.find((x) => x.label === label);
-        onNew(label, d ? d.confidence : 0, videoEl, timestampSec, d ? d.track_id : null);
-      }
-    });
+    const now = Date.now();
+    const current = new Set();
+
+    detections
+      // Only watchlisted AND security-relevant labels may trigger alerts
+      .filter(d => watchlist.has(d.label) && SECURITY_ALERT_LABELS.has(d.label))
+      .forEach(d => {
+        // Key includes track_id when available to distinguish different individuals
+        const key = d.track_id !== null && d.track_id !== undefined
+          ? `${d.label}_${d.track_id}`
+          : d.label;
+        current.add(key);
+
+        if (!prevActive.has(key)) {
+          // Check deduplication: for upload, fire once per key per session.
+          // For live, fire once per key per cooldown window.
+          const lastFired = trackAlertTimestamps.get(key) || 0;
+          const cooldownPassed = mode === "live"
+            ? (now - lastFired > LIVE_ALERT_COOLDOWN_MS)
+            : !firedAlertKeys.has(key);
+
+          if (cooldownPassed) {
+            onNew(d.label, d.confidence, videoEl, timestampSec, d.track_id);
+            firedAlertKeys.add(key);
+            trackAlertTimestamps.set(key, now);
+          }
+        }
+      });
     return current;
   }
 
@@ -1362,6 +1821,9 @@
     stopBtn.style.display = "none";
     setLiveMode(false);
     livePrevActive = new Set();
+    // Reset alert deduplication for the new live session
+    firedAlertKeys.clear();
+    trackAlertTimestamps.clear();
   }
   startBtn.addEventListener("click", startCamera);
   stopBtn.addEventListener("click", () => {
@@ -1394,6 +1856,15 @@
       trackTrails.clear();
       activeTracksMap.clear();
       lastActivityEntryTime = null;
+      // Reset alert deduplication and telemetry for the new video file
+      firedAlertKeys.clear();
+      trackAlertTimestamps.clear();
+      classCounts = {};
+      alertCount = 0;
+      statAlerts.textContent = "0";
+      captures = [];
+      renderCaptures();
+      renderWatchlist();
 
       uploadVideo.src = data.video_url;
       uploadVideo.style.display = "block";
@@ -1463,26 +1934,62 @@
   resizeObserver.observe(stage);
 
   // ---------- AI Intelligence Logic ----------
+  let isAIConfigured = false;
   function initAI() {
     fetch("/api/ai/status")
       .then(res => res.json())
       .then(data => {
         if (data.configured) {
+          isAIConfigured = true;
           aiStatusBadge.className = "ai-status-tag";
-          aiStatusBadge.innerHTML = `● NEMOTRON ONLINE`;
-          indNemotron.className = "ind-pill on";
+          aiStatusBadge.innerHTML = `● GROQ ONLINE`;
+          if (indGroq) {
+            indGroq.className = "ind-pill on";
+            indGroq.innerHTML = `<span class="dot"></span>GROQ ONLINE`;
+          }
+          const heroSub = $("aiHeroSubtitle");
+          if (heroSub) heroSub.textContent = "Powered by Groq — GPT-OSS 20B";
+          const copilotSub = $("copilotSubtitle");
+          if (copilotSub) copilotSub.textContent = "Powered by Groq — GPT-OSS 20B";
         } else {
+          isAIConfigured = false;
           aiStatusBadge.className = "ai-status-tag";
-          aiStatusBadge.innerHTML = `● NEMOTRON STANDBY`;
+          aiStatusBadge.innerHTML = `● AI STANDBY`;
+          if (indGroq) {
+            indGroq.className = "ind-pill";
+            indGroq.innerHTML = `<span class="dot"></span>AI STANDBY`;
+          }
+          const heroSub = $("aiHeroSubtitle");
+          if (heroSub) heroSub.textContent = "Powered by Deterministic Rule-Based Engine";
+          const copilotSub = $("copilotSubtitle");
+          if (copilotSub) copilotSub.textContent = "Powered by Deterministic Telemetry Engine";
         }
       }).catch(err => {
+        isAIConfigured = false;
         aiStatusBadge.className = "ai-status-tag";
-        aiStatusBadge.innerHTML = `● NEMOTRON OFFLINE`;
+        aiStatusBadge.innerHTML = `● AI OFFLINE`;
+        if (indGroq) {
+          indGroq.className = "ind-pill";
+          indGroq.innerHTML = `<span class="dot"></span>AI OFFLINE`;
+        }
       });
   }
   initAI();
 
+  const recentAnalyzedEvents = new Map();
   async function analyzeEvent(label, confidence, timestampSec, severity, trackId = null) {
+    const eventKey = `${label}_${trackId !== null ? trackId : 'notrack'}_${severity}`;
+    const now = Date.now();
+    if (recentAnalyzedEvents.has(eventKey) && (now - recentAnalyzedEvents.get(eventKey) < 10000)) {
+      return; // Do not spam analysis for the same tracked event
+    }
+    recentAnalyzedEvents.set(eventKey, now);
+    if (recentAnalyzedEvents.size > 100) {
+      for (const [k, v] of recentAnalyzedEvents.entries()) {
+        if (now - v > 60000) recentAnalyzedEvents.delete(k);
+      }
+    }
+
     aiStatusBadge.className = "ai-status-tag loading";
     aiStatusBadge.innerHTML = `◌ ANALYZING EVENT...`;
     
@@ -1521,9 +2028,13 @@
     } catch(e) {
       console.error(e);
       aiStatusBadge.className = "ai-status-tag";
-      aiStatusBadge.innerHTML = `● NEMOTRON ONLINE`;
+      aiStatusBadge.innerHTML = isAIConfigured ? `● GROQ ONLINE` : `● AI STANDBY`;
     }
   }
+
+  let lastExplainFetchTime = 0;
+  let lastFetchedThreatScore = -1;
+  let lastFetchedThreatLevel = "";
 
   async function explainThreat(score, level) {
     if (score === lastThreatScore && level === currentThreatLevel) return;
@@ -1535,11 +2046,21 @@
       aiReason.textContent = "No security threats or watchlisted anomalies detected.";
       aiActionText.textContent = "Maintain standard surveillance observation.";
       aiStatusBadge.className = "ai-status-tag";
-      aiStatusBadge.innerHTML = `● NEMOTRON ONLINE`;
+      aiStatusBadge.innerHTML = isAIConfigured ? `● GROQ ONLINE` : `● AI STANDBY`;
       return;
     }
     
     aiLead.textContent = `Threat Index elevated to ${score}/100 [${level}]`;
+
+    // Avoid spamming requests if same level and close score within 6 seconds
+    const now = Date.now();
+    if (level === lastFetchedThreatLevel && Math.abs(score - lastFetchedThreatScore) < 10 && (now - lastExplainFetchTime < 6000)) {
+      return;
+    }
+    lastExplainFetchTime = now;
+    lastFetchedThreatScore = score;
+    lastFetchedThreatLevel = level;
+
     try {
       const res = await fetch("/api/ai/explain-threat", {
         method: "POST",
@@ -1590,7 +2111,7 @@
     const loadingEl = document.createElement("div");
     loadingEl.className = "copilot-msg assistant";
     loadingEl.id = "copilotLoadingMsg";
-    loadingEl.innerHTML = `<span class="tag">ARGUS COPILOT</span><span style="color:var(--text-dim); font-style:italic;">Nemotron-3.5-Lightning is reasoning over telemetry...</span>`;
+    loadingEl.innerHTML = `<span class="tag">ARGUS COPILOT</span><span style="color:var(--text-dim); font-style:italic;">Groq (GPT-OSS 20B) is analyzing session telemetry...</span>`;
     copilotMessages.appendChild(loadingEl);
     copilotMessages.scrollTop = copilotMessages.scrollHeight;
 
@@ -1610,7 +2131,18 @@
             threat_level: currentThreatLevel,
             classes: classCounts,
             active_tracks: activeTracksPayload,
-            recent_alerts: captures.slice(0, 8)
+            recent_alerts: captures.slice(0, 8).map(c => ({
+              label: c.label,
+              trackId: c.trackId,
+              confidence: c.confidence,
+              time: c.time,
+              timestampSec: c.timestampSec,
+              movementPattern: c.movementPattern,
+              category: c.category,
+              severity: c.severity,
+              reason: c.reason,
+              risk_contribution: c.trackThreat
+            }))
           }
         })
       });
@@ -1622,11 +2154,11 @@
         if (data.answer) {
           addCopilotMsg(data.answer, false);
         } else {
-          addCopilotMsg("Nemotron returned an empty response.", false);
+          addCopilotMsg("Copilot returned an empty response.", false);
         }
       } else {
         const errText = await res.text();
-        addCopilotMsg(`[SYSTEM ERROR ${res.status}]: Unable to reach Nemotron endpoint. ${errText.slice(0, 120)}`, false);
+        addCopilotMsg(`[SYSTEM ERROR ${res.status}]: Unable to reach Copilot endpoint. ${errText.slice(0, 120)}`, false);
       }
     } catch(e) {
       if (loadingEl.parentNode) loadingEl.remove();
@@ -1710,7 +2242,7 @@
 </head>
 <body>
   <h1>ARGUS — Surveillance Intelligence Briefing</h1>
-  <div class="meta">SYSTEM DOSSIER · GENERATED ${new Date().toLocaleString()} · NEMOTRON-3.5-LIGHTNING</div>
+  <div class="meta">SYSTEM DOSSIER · GENERATED ${new Date().toLocaleString()} · GROQ — GPT-OSS 20B</div>
 
   <div class="stats">
     <div class="stat"><div class="num">${statElapsed.textContent}</div><div class="lbl">Elapsed Surveillance</div></div>
@@ -1734,7 +2266,7 @@
     ${alertRows || '<tr><td colspan="4">No security events triggered.</td></tr>'}
   </table>
 
-  <p class="footer-note">ARGUS AI Surveillance Command Center · Nemotron 3.5 Lightning Intelligence Layer</p>
+  <p class="footer-note">ARGUS AI Surveillance Command Center · Groq — GPT-OSS 20B Intelligence Layer</p>
 </body></html>`;
   }
 
@@ -1759,6 +2291,17 @@
       exportBtn.disabled = false;
     }
   }
+  // ---------- Sensor Context Accordion Toggle (P4) ----------
+  const sensorContextHeader = $("sensorContextHeader");
+  const sensorContextBody = $("sensorContextBody");
+  const sensorContextCaret = $("sensorContextCaret");
+  if (sensorContextHeader) {
+    sensorContextHeader.addEventListener("click", () => {
+      const isOpen = sensorContextBody.classList.toggle("open");
+      sensorContextCaret.classList.toggle("open", isOpen);
+    });
+  }
+
   $("exportBtn").addEventListener("click", exportReport);
 })();
 </script>

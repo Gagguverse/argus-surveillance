@@ -6,7 +6,7 @@
 
 ## 1. Project Overview
 
-ARGUS is an AI-assisted aerial/drone surveillance video-analysis system that processes recorded thermal/low-light footage representing a simulated drone camera feed. It combines deterministic computer-vision pipelines (YOLOv8 + BoT-SORT tracking) with a natural-language intelligence layer (NVIDIA Nemotron 3.5 Lightning) to detect, track, and explain suspicious activity in a defined perimeter.
+ARGUS is an AI-assisted aerial/drone surveillance video-analysis system that processes recorded thermal/low-light footage representing a simulated drone camera feed. It combines deterministic computer-vision pipelines (YOLOv8 + BoT-SORT tracking) with a natural-language intelligence layer (Groq AI — `openai/gpt-oss-20b`) to detect, track, and explain suspicious activity in a defined perimeter.
 
 The system is designed for the hackathon problem: **AI-Based Border Surveillance Using Drones** — processing thermal and/or low-light video to detect and flag suspicious human movement patterns while distinguishing them from non-threat activity.
 
@@ -45,7 +45,7 @@ ARGUS addresses these through a layered pipeline: detection → persistent track
 | **Automatic snapshots** | ✅ | Thumbnail captured at alert time, viewable in lightbox |
 | **Session/report generation** | ✅ | One-click HTML export with AI briefing, charts, event table |
 | **AI Intelligence Panel** | ✅ | Real-time assessment, reason, recommended action |
-| **Nemotron 3.5 Lightning integration** | ✅ | Via NVIDIA API (falls back to heuristic rules if no key) |
+| **Groq AI integration** | ✅ | Ultra-fast inference via Groq API (falls back to heuristic rules if no key) |
 | **Natural-language surveillance briefing/chat** | ✅ | Copilot chat + session summary endpoint |
 
 ---
@@ -65,12 +65,12 @@ Thermal/Low-light / Simulated Drone Footage (uploaded video)
                     ↓
         Alerts + Events + Snapshots (rising-edge)
                     ↓
-       Nemotron AI Intelligence Layer (interpretation)
+       Groq AI Intelligence Layer (interpretation)
                     ↓
       Operator-Facing Briefing / Chat (Copilot)
 ```
 
-**Deterministic computer-vision outputs (detections, tracks, scores) remain the source of truth.** Nemotron receives structured telemetry and returns natural-language assessments, explanations, summaries, and answers to operator questions. It does not replace detection/tracking.
+**Deterministic computer-vision outputs (detections, tracks, scores) remain the source of truth.** Groq receives structured telemetry and returns natural-language assessments, explanations, summaries, and answers to operator questions. It does not replace detection/tracking.
 
 ---
 
@@ -133,10 +133,11 @@ The hackathon permits publicly available thermal/low-light datasets or footage. 
 
 ---
 
-## 9. AI — Nemotron 3.5 Lightning
+## 9. AI — Groq Intelligence Layer
 
-**Powered by NVIDIA Nemotron 3.5 Lightning** (integration present in `server.py` and `frontend/index.html`).
+**Powered by Groq Cloud API** (`openai/gpt-oss-20b` fast model, integration present in `server.py`).
 
+- **Ultra-fast sub-second LLM inference** — optimized for real-time surveillance operations
 - Surveillance telemetry (detections, tracks, threat score, alerts, session context) is provided as structured context to the model
 - The AI can:
   - Explain *why* a specific event was flagged (`/api/ai/analyze-event`)
@@ -145,7 +146,42 @@ The hackathon permits publicly available thermal/low-light datasets or footage. 
   - Answer operator questions in natural language (`/api/ai/copilot`)
 - **It does NOT replace** the computer-vision detection/tracking system
 - **Final operational decisions remain with the human operator**
-- Falls back to deterministic heuristic rules when no API key is configured
+- Falls back to deterministic heuristic rules when no `GROQ_API_KEY` is configured
+
+## Drone Simulation Context
+
+Live border/drone camera feeds are **not available** for the hackathon environment. ARGUS treats uploaded recorded footage (thermal, low-light, or optical) as the **simulated drone-camera input**. The analysis pipeline is identical to what would be applied to a live drone feed — only the ingestion mechanism differs.
+
+ARGUS does **not** claim to:
+- Control or autonomously pilot a drone
+- Make autonomous military targeting decisions
+- Operate on classified border/military infrastructure
+
+Human operator review is required for all alerts. ARGUS is a decision-support tool.
+
+## CV Pipeline
+
+```
+DETECTION (YOLOv8n) → TRACK ID (BoT-SORT) → MOVEMENT PATTERN (Heuristic) → THREAT SCORE (Deterministic) → ALERT
+```
+
+- **Detection**: YOLOv8n (nano) — 80 COCO object classes including person, vehicle, animal, weapon
+- **Tracking**: BoT-SORT persistent tracking — assigns stable Track IDs across frames
+- **Movement Classification** *(prototype heuristic)*: Based on pixel velocity from trail history and bounding-box aspect ratio. Classifies: Normal Walking, Fast Movement, Group Movement (≥3 persons), Low-Profile/Crouching-like [heuristic]. **Not** a trained pose model — YOLOv8n does not perform pose estimation.
+- **Entity Classification**: HUMAN / ANIMAL / VEHICLE / OBJECT — derived from YOLO class labels. Non-human detections do not receive elevated human threat weighting.
+- **Threat Score**: Deterministic rule-based engine (0–100). Animals and vehicles receive reduced weight vs. suspicious human movement. Low-profile movement adds a bonus.
+- **Groq AI**: Natural-language explanation layer only. Does NOT own detection, tracking, or authoritative scoring. Explains telemetry, summarizes events, answers operator questions.
+
+## Thermal / Low-Light Challenges
+
+ARGUS is designed to handle footage from sensors that exhibit:
+- Low-resolution thermal imagery
+- Thermal blooming (blurred heat boundaries)
+- Absence of RGB color/texture information
+- Partial occlusion
+- Temporal ambiguity between frames
+
+Persistent multi-frame tracking (BoT-SORT) provides additional context, but does **not completely solve** these challenges. See the "Sensor Context & Limitations" panel in the dashboard sidebar.
 
 ---
 
@@ -166,7 +202,7 @@ ARGUS is the **software analysis layer** for drone-based surveillance.
 | Backend | Python 3.10+, FastAPI, Uvicorn |
 | Computer Vision | OpenCV, Ultralytics YOLOv8, PyTorch |
 | Tracking | BoT-SORT (built into Ultralytics `model.track`) |
-| AI Intelligence | NVIDIA Nemotron 3.5 Lightning (via REST API) |
+| AI Intelligence | Groq Cloud API (`openai/gpt-oss-20b` via REST API) |
 | Frontend | Single-file HTML/CSS/JavaScript (no framework) |
 | Real-time | WebSocket (live camera mode) |
 | Video Processing | OpenCV `VideoCapture` (frame sampling ~2 fps) |
@@ -178,7 +214,7 @@ ARGUS is the **software analysis layer** for drone-based surveillance.
 
 ```
 argus/
-├── server.py              # FastAPI backend + YOLOv8 inference + Nemotron endpoints
+├── server.py              # FastAPI backend + YOLOv8 inference + Groq AI endpoints
 ├── requirements.txt       # Python dependencies
 ├── frontend/
 │   └── index.html         # Full dashboard UI (HTML + CSS + JS, single file)
@@ -234,7 +270,7 @@ Open **http://localhost:8000** in a browser. That's the entire dashboard.
 4. **Movement analysis** — Velocity computed from track history; trails drawn
 5. **Suspicion score** — Deterministic 0–100 index updates per frame (watchlist-weighted)
 6. **Alert/event** — Rising-edge watchlist hits create timeline entries with thumbnails
-7. **AI explanation/briefing** — Nemotron panel updates automatically; open Copilot to ask questions
+7. **AI explanation/briefing** — AI Intelligence panel updates automatically; open Copilot to ask questions
 
 **Live camera mode** also available for real-time webcam demo (optical, not thermal).
 
@@ -248,7 +284,7 @@ Open **http://localhost:8000** in a browser. That's the entire dashboard.
 - **No live drone hardware/feed** — hackathon prototype uses uploaded files only
 - **Thermal blooming / low-resolution challenges** — not explicitly mitigated beyond tracking persistence
 - **Single-class tracking** — BoT-SORT may swap IDs on prolonged occlusion
-- **Nemotron API key required** for full AI features; heuristic fallback is rule-based only
+- **Groq API key required** for full AI features; heuristic fallback is rule-based only
 
 ---
 
