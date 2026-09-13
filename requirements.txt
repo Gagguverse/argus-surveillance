@@ -4,3 +4,4 @@ opencv-python-headless==4.10.0.84
 ultralytics==8.2.103
 python-multipart==0.0.9
 websockets==13.1
+lapx>=0.5.2
